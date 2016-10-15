@@ -2,6 +2,11 @@
 
 public class TankMotor : MonoBehaviour
 {
+    /// <summary>
+    /// The Tank GameObject's current forward position.
+    /// </summary>
+    public Vector3 ForwardVector { get { return _bodyTransform.forward; } }
+
     // references to the gameobject containers' transforms for the tank body segments
     [SerializeField]
     private Transform _bodyTransform;
@@ -10,7 +15,7 @@ public class TankMotor : MonoBehaviour
     private CharacterController _characterController;
 
 	// Use this for initialization
-	private void Start ()
+	private void Start()
     {
         if (_characterController == null)
         {
@@ -30,7 +35,7 @@ public class TankMotor : MonoBehaviour
     public void Move(float speed)
     {
         // Move forward from the current rotation / position
-        Vector3 speedVector = transform.forward * speed;
+        Vector3 speedVector = _bodyTransform.forward * speed;
 
         // simpleMove applies Time.deltaTime, so it's unneeded by us <-- DON'T FORGET
         _characterController.SimpleMove(speedVector);
