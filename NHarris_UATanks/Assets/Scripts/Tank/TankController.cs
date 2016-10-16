@@ -1,35 +1,36 @@
-﻿using UnityEngine;
+﻿using L4.Unity.Common;
+using UnityEngine;
+
+/*
+    NOTE: To see the code for L4.Unity.Common, go to https://github.com/Mordil/Unity-Utility.
+*/
 
 [RequireComponent(typeof(TankSettings))]
-public class TankController : MonoBehaviour
+public class TankController : BaseScript
 {
     protected bool IsDead { get { return CurrentHealth <= 0; } }
 
     [SerializeField]
     protected int CurrentHealth;
     [SerializeField]
-    protected int Points;
+    protected int CurrentScore;
 
     [SerializeField]
     private TankSettings _settings;
 
     #region Unity Lifecycle
-    protected virtual void Start()
+    protected override void Start()
     {
-        if (_settings == null)
-        {
-            _settings = GetComponent<TankSettings>();
-        }
+        base.Start();
 
         CurrentHealth = _settings.MaxHealth;
 	}
 	
-	protected virtual void Update()
+	protected override void Update()
     {
         if (IsDead)
         {
             Destroy(this.gameObject);
-            // TODO: Add points to GameManager
         }
 	}
 
@@ -38,9 +39,15 @@ public class TankController : MonoBehaviour
         // if the tank was hit by a bullet
         if (otherObj.gameObject.IsOnSameLayer(ProjectSettings.Layers.Projectiles))
         {
-            // handle bullet collision event
             onBulletCollision(otherObj.gameObject.GetComponent<TankBullet>());
         }
+    }
+    #endregion
+
+    #region BaseScript
+    protected override void CheckDependencies()
+    {
+        this.CheckAndAssignIfDependencyIsNull(ref _settings);
     }
     #endregion
 
@@ -49,9 +56,17 @@ public class TankController : MonoBehaviour
         CurrentHealth -= amount;
     }
 
+    /// <summary>
+    /// Adds the amount provided to the tank's score if it is a player.
+    /// </summary>
+    /// <param name="amount"></param>
     public void GainPoints(int amount)
     {
-        Points += amount;
+        // only players get points
+        if (_settings.IsPlayer)
+        {
+            CurrentScore += amount;
+        }
     }
 
     protected virtual void onBulletCollision(TankBullet bullet)
@@ -63,6 +78,7 @@ public class TankController : MonoBehaviour
 
             if (IsDead)
             {
+                // notify the tank it should probably earn points.
                 bullet.Owner.GainPoints(_settings.KillValue);
             }
         }

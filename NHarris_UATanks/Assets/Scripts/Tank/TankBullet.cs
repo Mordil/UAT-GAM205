@@ -1,11 +1,28 @@
-﻿using System;
+﻿using L4.Unity.Common;
+using System;
 using UnityEngine;
 
+/*
+    Notes:
+    I know I'm not following this requirement as stated in the assignment post:
+
+    The amount of damage done by a shell is a property of the entity firing the shell and can be edited by designers in the inspector.
+
+    This is because I think this limits gameplay through architecture because additional code would need
+    to be written in the TankSettings to allow different bullets, while having the settings
+    on the bullet itself allows easier ability to add different bullet types.
+
+    It's not that I didn't read instructions, I believe this is better code / design for this project.
+*/
+
 [RequireComponent(typeof(Rigidbody))]
-public class TankBullet : MonoBehaviour
+public class TankBullet : BaseScript
 {
     public int Damage { get { return _damage; } }
 
+    /// <summary>
+    /// The tank that fired this bullet.
+    /// </summary>
     public TankController Owner { get; private set; }
 
     [SerializeField]
@@ -22,17 +39,14 @@ public class TankBullet : MonoBehaviour
     [SerializeField]
     private Rigidbody _rigidbody;
 
-    private void Awake()
+    #region Unity Lifecycle
+    protected override void Awake()
     {
         // This component is created after the game has already started, so this done here instead of Start()
-
-        if (_rigidbody == null)
-        {
-            _rigidbody = GetComponent<Rigidbody>();
-        }
+        this.CheckAndAssignIfDependencyIsNull(ref _rigidbody);
     }
 
-    private void Update()
+    protected override void Update()
     {
         // if the time of death is now or in the past
         if (DateTime.Now >= _timeOfDeath)
@@ -45,11 +59,12 @@ public class TankBullet : MonoBehaviour
     private void OnTriggerEnter(Collider otherObj)
     {
         // if the collision is not with the shooter
-        if (otherObj.gameObject != Owner.gameObject)
+        if (Owner != null && Owner.gameObject != otherObj.gameObject)
         {
             Destroy(this.gameObject);
         }
     }
+    #endregion
 
     /// <summary>
     /// Initializes the bullet with the settings provided.

@@ -1,7 +1,8 @@
-﻿using UnityEngine;
+﻿using L4.Unity.Common;
+using UnityEngine;
 
-[RequireComponent(typeof(TankSettings), typeof(TankMotor), typeof(TankController))]
-public class TankShooter : MonoBehaviour
+[RequireComponent(typeof(TankSettings), typeof(TankMotor))]
+public class TankShooter : BaseScript
 {
     [SerializeField]
     private TankSettings _tankSettings;
@@ -10,23 +11,14 @@ public class TankShooter : MonoBehaviour
     [SerializeField]
     private TankController _controller;
 
-    private	void Start()
+    protected override void CheckDependencies()
     {
-	    if (_tankSettings == null)
-        {
-            _tankSettings = GetComponent<TankSettings>();
-        }
+        base.CheckDependencies();
 
-        if (_motor == null)
-        {
-            _motor = GetComponent<TankMotor>();
-        }
-
-        if (_controller == null)
-        {
-            _controller = GetComponent<TankController>();
-        }
-	}
+        this.CheckAndAssignIfDependencyIsNull(ref _tankSettings);
+        this.CheckAndAssignIfDependencyIsNull(ref _motor);
+        this.CheckAndAssignIfDependencyIsNull(ref _controller);
+    }
 
     /// <summary>
     /// Instantiates a new bullet from the GameObject's TankSettings component and initializes it.
@@ -35,10 +27,12 @@ public class TankShooter : MonoBehaviour
     {
         BulletSettings bulletSettings = _tankSettings.BulletSettings;
 
+        // instantiate a bullet and keep a reference to the GameObject
         var bullet = Instantiate(bulletSettings.Prefab,
                                 bulletSettings.SpawnPoint.position,
                                 bulletSettings.SpawnPoint.rotation * bulletSettings.Prefab.transform.rotation) as GameObject;
 
+        // gives the bullet its forward trajectory and owner reference
         bullet.GetComponent<TankBullet>()
             .Initialize(_motor.ForwardVector, _controller);
     }

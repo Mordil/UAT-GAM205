@@ -19,6 +19,8 @@ public class MovementSpeeds
 [Serializable]
 public class BulletSettings
 {
+    // See TankBullet for additional details.
+
     /// <summary>
     /// The spawner's transform.
     /// </summary>

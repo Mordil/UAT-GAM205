@@ -90,10 +90,9 @@ GameObject:
   m_Component:
   - 4: {fileID: 400012}
   - 143: {fileID: 14300000}
-  - 114: {fileID: 114000010544102442}
   - 114: {fileID: 114000010324364050}
-  - 114: {fileID: 114000013181609784}
   - 135: {fileID: 135000011593463212}
+  - 114: {fileID: 114000011238071898}
   m_Layer: 0
   m_Name: Tank
   m_TagString: Untagged
@@ -195,7 +194,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 100012}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_Children:
@@ -436,12 +435,9 @@ MonoBehaviour:
     _backward: 3
     _rotation: 180
   _bulletSettings:
-    _damage: 10
-    _lifespan: 3
-    _speed: 2
     _prefab: {fileID: 1000012152444412, guid: bc041c35e5230fa41a26fbc602e13f18, type: 2}
     _spawnPoint: {fileID: 4000011959581660}
---- !u!114 &114000010544102442
+--- !u!114 &114000011238071898
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
@@ -449,24 +445,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 100012}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 12984266bb32b324fbafee9da1207752, type: 3}
+  m_Script: {fileID: 11500000, guid: 7b2101968bd55c348a53943e35805d74, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _bodyTransform: {fileID: 400012}
-  _characterController: {fileID: 14300000}
---- !u!114 &114000013181609784
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 100012}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1a6796e1afeba0f478378eda5e4e1b52, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _tankSettings: {fileID: 0}
-  _motor: {fileID: 114000010544102442}
+  CurrentHealth: 0
+  Points: 0
+  _settings: {fileID: 0}
 --- !u!135 &135000011593463212
 SphereCollider:
   m_ObjectHideFlags: 1

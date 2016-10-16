@@ -1,6 +1,7 @@
-﻿using UnityEngine;
+﻿using L4.Unity.Common;
+using UnityEngine;
 
-public class TankMotor : MonoBehaviour
+public class TankMotor : BaseScript
 {
     /// <summary>
     /// The Tank GameObject's current forward position.
@@ -14,20 +15,14 @@ public class TankMotor : MonoBehaviour
     [SerializeField]
     private CharacterController _characterController;
 
-	// Use this for initialization
-	private void Start()
+    protected override void CheckDependencies()
     {
-        if (_characterController == null)
-        {
-            _characterController = GetComponent<CharacterController>();
-        }
+        base.CheckDependencies();
 
-        if (_bodyTransform == null)
-        {
-            _bodyTransform = GetComponent<Transform>();
-        }
-	}
-    
+        this.CheckAndAssignIfDependencyIsNull(ref _bodyTransform, true);
+        this.CheckAndAssignIfDependencyIsNull(ref _characterController);
+    }
+
     /// <summary>
     /// Moves the tank forward by the the speed provided.
     /// </summary>
