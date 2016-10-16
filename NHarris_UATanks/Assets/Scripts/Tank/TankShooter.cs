@@ -1,12 +1,14 @@
 ﻿using UnityEngine;
 
-[RequireComponent(typeof(TankSettings), typeof(TankMotor))]
+[RequireComponent(typeof(TankSettings), typeof(TankMotor), typeof(TankController))]
 public class TankShooter : MonoBehaviour
 {
     [SerializeField]
     private TankSettings _tankSettings;
     [SerializeField]
     private TankMotor _motor;
+    [SerializeField]
+    private TankController _controller;
 
     private	void Start()
     {
@@ -19,6 +21,11 @@ public class TankShooter : MonoBehaviour
         {
             _motor = GetComponent<TankMotor>();
         }
+
+        if (_controller == null)
+        {
+            _controller = GetComponent<TankController>();
+        }
 	}
 
     /// <summary>
@@ -26,14 +33,13 @@ public class TankShooter : MonoBehaviour
     /// </summary>
     public void Fire()
     {
-        BulletSettings settings = _tankSettings.BulletSettings;
+        BulletSettings bulletSettings = _tankSettings.BulletSettings;
 
-        var bullet = Instantiate(settings.Prefab,
-                                settings.SpawnPoint.position,
-                                settings.SpawnPoint.rotation * settings.Prefab.transform.rotation) as GameObject;
+        var bullet = Instantiate(bulletSettings.Prefab,
+                                bulletSettings.SpawnPoint.position,
+                                bulletSettings.SpawnPoint.rotation * bulletSettings.Prefab.transform.rotation) as GameObject;
+
         bullet.GetComponent<TankBullet>()
-            .Initialize(settings.Damage, settings.Lifespan);
-        bullet.GetComponent<Rigidbody>()
-            .AddForce(_motor.ForwardVector * settings.Speed, ForceMode.Force);
+            .Initialize(_motor.ForwardVector, _controller);
     }
 }

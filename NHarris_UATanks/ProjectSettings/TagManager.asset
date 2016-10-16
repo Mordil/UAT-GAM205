@@ -14,12 +14,12 @@ TagManager:
   - UI
   - 
   - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
+  - Projectiles
+  - Player
+  - Enemy
+  - Floor
+  - Wall
+  - InvisiWall
   - 
   - 
   - 

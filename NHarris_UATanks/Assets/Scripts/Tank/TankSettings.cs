@@ -20,19 +20,6 @@ public class MovementSpeeds
 public class BulletSettings
 {
     /// <summary>
-    /// The damage it deals when colliding with damagable objects.
-    /// </summary>
-    public int Damage { get { return _damage; } }
-    /// <summary>
-    /// Time (in seconds) the bullet stays alive before self destroying.
-    /// </summary>
-    public float Lifespan { get { return _lifespan; } }
-    /// <summary>
-    /// Speed (meters per second) the bullet moves.
-    /// </summary>
-    public float Speed { get { return _speed; } }
-
-    /// <summary>
     /// The spawner's transform.
     /// </summary>
     public Transform SpawnPoint { get { return _spawnPoint; } }
@@ -42,14 +29,6 @@ public class BulletSettings
     /// </summary>
     public GameObject Prefab { get { return _prefab; } }
 
-    [SerializeField]
-    private int _damage = 10;
-    [SerializeField]
-    [Tooltip("How long the bullet exists before it will self destroy.")]
-    private float _lifespan = 3f;
-    [SerializeField]
-    [Tooltip("Units (in meters) the bullet moves per second.")]
-    private float _speed = 2f;
 
     [SerializeField]
     private GameObject _prefab;
@@ -60,13 +39,18 @@ public class BulletSettings
 
 public class TankSettings : MonoBehaviour
 {
+    public bool IsPlayer { get { return _isPlayer; } }
+
     public int MaxHealth { get { return _maxHealth; } }
     public int KillValue { get { return _killValue; } }
     public float RateOfFire { get { return _rateOfFire; } }
 
     public MovementSpeeds MovementSettings { get { return _movementSettings; } }
     public BulletSettings BulletSettings { get { return _bulletSettings; } }
-    
+
+    [SerializeField]
+    private bool _isPlayer = false;
+
     [SerializeField]
     private int _maxHealth = 20;
     [SerializeField]
