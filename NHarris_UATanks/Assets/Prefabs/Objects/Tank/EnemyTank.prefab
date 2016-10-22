@@ -483,18 +483,18 @@ MonoBehaviour:
     _patrolPointThreshold: 1.5
     _hearingDistance: 3
     _lineOfSightAngle: 120
-    _agressivePersonalitySettings:
+    _agressiveSettings:
       _increaseSpeed: 0
       _increaseHealth: 0
       _increaseFireRate: 0
       _speedIncreaseValue: 0
       _healthIncreaseValue: 0
       _fireRateIncrease: 0
-    _guardCaptainPersonalitySettings:
+    _guardCaptainSettings:
       _numberOfTanksToSpawn: 5
       _tanksToSpawnPrefabs: []
-    _selectedPersonality: 2
-    _selectedPatrolMode: 0
+    _personality: 2
+    _patrolMode: 0
     _patrolPoints: []
 --- !u!135 &135000013449051822
 SphereCollider:

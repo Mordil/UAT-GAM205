@@ -18,7 +18,7 @@ public enum Personality
     /// </summary>
     Standard,
     /// <summary>
-    /// Patrol tank that goes phases between visible and invisible.
+    /// Patrol tank that phases between visible and invisible.
     /// </summary>
     PhaseShift,
     /// <summary>
@@ -74,8 +74,8 @@ public class AITankSettings
     /// </summary>
     public float PatrolPointThresholdMagnitude { get { return _patrolPointThreshold * _patrolPointThreshold; } }
 
-    public Personality SelectedPersonality { get { return _selectedPersonality; } }
-    public PatrolMode SelectedPatrolMode { get { return _selectedPatrolMode; } }
+    public Personality SelectedPersonality { get { return _personality; } }
+    public PatrolMode SelectedPatrolMode { get { return _patrolMode; } }
 
     [SerializeField]
     [Tooltip("The distance (in meters) the tank needs to reach towards a patrol point before selecting the next one.")]
@@ -88,13 +88,13 @@ public class AITankSettings
     private float _lineOfSightAngle = 120f;
 
     [SerializeField]
-    private AggressivePersonalitySettings _agressivePersonalitySettings;
+    private AggressivePersonalitySettings _agressiveSettings;
     [SerializeField]
-    private GuardCaptainPersonalitySettings _guardCaptainPersonalitySettings;
+    private GuardCaptainPersonalitySettings _guardCaptainSettings;
     [SerializeField]
-    private Personality _selectedPersonality = Personality.Standard;
+    private Personality _personality = Personality.Standard;
     [SerializeField]
-    private PatrolMode _selectedPatrolMode = PatrolMode.Loop;
+    private PatrolMode _patrolMode = PatrolMode.Loop;
 
     [SerializeField]
     [Tooltip("The places the tank will patrol between when in patrol mode.")]
