@@ -157,6 +157,7 @@ public class AIInputController : InputControllerBase
 
         if (!IsLookingAtPatrolPoint(currentPoint))
         {
+            MotorComponent.RotateTowards(currentPoint, Settings.MovementSettings.Rotation);
         }
         else
         {
@@ -171,10 +172,6 @@ public class AIInputController : InputControllerBase
         // if the tank is too far from the patrol point, the next one shouldn't be selected
         if (GetDistanceFromObject(currentPoint) > _aiSettings.PatrolPointThresholdMagnitude)
         {
-            Debug.Log(string.Format("Threshold: {0}, Magnitude Threshold: {1}, CalculatedDistance: {2}",
-                _aiSettings.PatrolPointThreshold,
-                _aiSettings.PatrolPointThresholdMagnitude,
-                GetDistanceFromObject(currentPoint)));
             return;
         }
 
@@ -230,6 +227,8 @@ public class AIInputController : InputControllerBase
 
     private bool IsLookingAtPatrolPoint(Transform pointToCheck)
     {
-        return true;
+        Quaternion directions = Quaternion.LookRotation(pointToCheck.position - MyTransform.position);
+
+        return directions == MyTransform.rotation;
     }
 }

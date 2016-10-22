@@ -37,9 +37,9 @@ public class TankMotor : BaseScript
     }
 
     /// <summary>
-    /// Rotates a the tank by the speed provided.
+    /// Rotates the tank by the speed provided.
     /// </summary>
-    /// <param name="speed">The speed in meters per second to rotate by.</param>
+    /// <param name="speed">The speed in angles per second to rotate by.</param>
     public void Rotate(float speed)
     {
         // Maintain current "up" position, to rotate horizontally.
@@ -48,5 +48,17 @@ public class TankMotor : BaseScript
 
         // apply the rotation
         _bodyTransform.Rotate(rotateVector, Space.Self);
+    }
+
+    /// <summary>
+    /// Rotates the tank towards the target by the speed provided.
+    /// </summary>
+    /// <param name="target">The target's transform</param>
+    /// <param name="speed">The rotation speed in angles per second.</param>
+    public void RotateTowards(Transform target, float speed)
+    {
+        Vector3 rotateVector = target.position - _bodyTransform.position;
+        Quaternion rotationDirections = Quaternion.LookRotation(rotateVector);
+        _bodyTransform.rotation = Quaternion.RotateTowards(_bodyTransform.rotation, rotationDirections, speed * Time.deltaTime);
     }
 }
