@@ -478,6 +478,22 @@ MonoBehaviour:
   Settings: {fileID: 0}
   MotorComponent: {fileID: 0}
   ShooterComponent: {fileID: 0}
+  _selectedPersonality: 0
+  _currentActionMode: 0
+  _aiSettings:
+    _hearingDistance: 20
+    _lineOfSightAngle: 120
+    _agressivePersonalitySettings:
+      _increaseSpeed: 0
+      _increaseHealth: 0
+      _increaseFireRate: 0
+      _speedIncreaseValue: 0
+      _healthIncreaseValue: 0
+      _fireRateIncrease: 0
+    _guardCaptainPersonalitySettings:
+      _numberOfTanksToSpawn: 5
+      _tanksToSpawnPrefabs: []
+    _patrolPoints: []
 --- !u!135 &135000013449051822
 SphereCollider:
   m_ObjectHideFlags: 1
