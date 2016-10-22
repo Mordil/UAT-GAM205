@@ -1,6 +1,7 @@
 ﻿//using L4.Unity.Common;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public enum Personality
@@ -66,6 +67,12 @@ public class GuardCaptainPersonalitySettings
 }
 
 [Serializable]
+public class ShiftPhaserPersonalitySettings
+{
+    public OpacityPhaserSettings Settings;
+}
+
+[Serializable]
 public class AITankSettings
 {
     public float PatrolPointThreshold { get { return _patrolPointThreshold; } }
@@ -76,6 +83,7 @@ public class AITankSettings
 
     public Personality SelectedPersonality { get { return _personality; } }
     public PatrolMode SelectedPatrolMode { get { return _patrolMode; } }
+    public ShiftPhaserPersonalitySettings ShiftPhasingSettings { get { return _shiftPhasingSettings; } }
 
     [SerializeField]
     [Tooltip("The distance (in meters) the tank needs to reach towards a patrol point before selecting the next one.")]
@@ -91,6 +99,8 @@ public class AITankSettings
     private AggressivePersonalitySettings _agressiveSettings;
     [SerializeField]
     private GuardCaptainPersonalitySettings _guardCaptainSettings;
+    [SerializeField]
+    private ShiftPhaserPersonalitySettings _shiftPhasingSettings;
     [SerializeField]
     private Personality _personality = Personality.Standard;
     [SerializeField]
@@ -135,9 +145,19 @@ public class AIInputController : InputControllerBase
 
     protected override void Awake()
     {
-        // because a tank can be instantiated at runtime, BaseScript.Start() won't be called
-        // so we want to explicitly check Dependencies
-        this.CheckDependencies();
+        // because a tank can be instantiated at runtime, start won't be called, so we do it ourselves
+        base.Start();
+
+        // if the AI is meant to do phase shifting, check to see if it has the proper component
+        if (_aiSettings.SelectedPersonality == Personality.PhaseShift)
+        {
+            // if not, add it and initialize its settings
+            if (GetComponent<OpacityPhaser>() == null)
+            {
+                this.gameObject.AddComponent<OpacityPhaser>();
+                GetComponent<OpacityPhaser>().Initialize(_aiSettings.ShiftPhasingSettings.Settings);
+            }
+        }
     }
 
     protected override void Update()
@@ -146,7 +166,10 @@ public class AIInputController : InputControllerBase
         {
             case ActionMode.Patrol:
             default:
-                PatrolUpdate();
+                if (_aiSettings.PatrolPoints.Count > 0)
+                {
+                    PatrolUpdate();
+                }
                 break;
         }
     }

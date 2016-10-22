@@ -464,11 +464,6 @@ Prefab:
   m_Modification:
     m_TransformParent: {fileID: 1982145894}
     m_Modifications:
-    - target: {fileID: 114000012279025492, guid: 272370901210b21428b21561f4809898,
-        type: 2}
-      propertyPath: _aiSettings._patrolPoints.Array.size
-      value: 4
-      objectReference: {fileID: 0}
     - target: {fileID: 4000012560035592, guid: 272370901210b21428b21561f4809898, type: 2}
       propertyPath: m_LocalPosition.x
       value: -13.24
@@ -505,59 +500,15 @@ Prefab:
       propertyPath: m_Name
       value: EnemyTank (1)
       objectReference: {fileID: 0}
-    - target: {fileID: 4000012560035592, guid: 272370901210b21428b21561f4809898, type: 2}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 130.13701
-      objectReference: {fileID: 0}
-    - target: {fileID: 114000011632668472, guid: 272370901210b21428b21561f4809898,
+    - target: {fileID: 114000012279025492, guid: 272370901210b21428b21561f4809898,
         type: 2}
-      propertyPath: _rateOfFire
-      value: 0.5
+      propertyPath: _aiSettings._shiftPhasingSettings.Settings._maxOpacity
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 114000012279025492, guid: 272370901210b21428b21561f4809898,
         type: 2}
-      propertyPath: _selectedPersonality
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 114000012279025492, guid: 272370901210b21428b21561f4809898,
-        type: 2}
-      propertyPath: _aiSettings._patrolPoints.Array.data[0]
-      value: 
-      objectReference: {fileID: 2060793106}
-    - target: {fileID: 114000012279025492, guid: 272370901210b21428b21561f4809898,
-        type: 2}
-      propertyPath: _aiSettings._patrolPoints.Array.data[1]
-      value: 
-      objectReference: {fileID: 1818108178}
-    - target: {fileID: 114000012279025492, guid: 272370901210b21428b21561f4809898,
-        type: 2}
-      propertyPath: _aiSettings._patrolPoints.Array.data[2]
-      value: 
-      objectReference: {fileID: 116895806}
-    - target: {fileID: 114000012279025492, guid: 272370901210b21428b21561f4809898,
-        type: 2}
-      propertyPath: _aiSettings._patrolPoints.Array.data[3]
-      value: 
-      objectReference: {fileID: 1090861212}
-    - target: {fileID: 114000011632668472, guid: 272370901210b21428b21561f4809898,
-        type: 2}
-      propertyPath: _movementSettings._rotation
-      value: 180
-      objectReference: {fileID: 0}
-    - target: {fileID: 114000011632668472, guid: 272370901210b21428b21561f4809898,
-        type: 2}
-      propertyPath: _bulletSettings._prefab
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 114000011632668472, guid: 272370901210b21428b21561f4809898,
-        type: 2}
-      propertyPath: _bulletSettings._spawnPoint
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 114000012279025492, guid: 272370901210b21428b21561f4809898,
-        type: 2}
-      propertyPath: _aiSettings._patrolPointThreshold
-      value: 1.5
+      propertyPath: _aiSettings._shiftPhasingSettings.Settings._transitionSpeed
+      value: 0.25
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 272370901210b21428b21561f4809898, type: 2}

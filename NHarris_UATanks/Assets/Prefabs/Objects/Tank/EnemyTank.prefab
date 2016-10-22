@@ -209,10 +209,10 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1000011237834544}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: 0, y: 0.008726558, z: 0, w: 0.999962}
   m_LocalPosition: {x: 0, y: 1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 1, z: 0}
   m_Children:
   - {fileID: 4000012240837664}
   - {fileID: 4000011415003404}
@@ -442,14 +442,14 @@ MonoBehaviour:
   _isPlayer: 0
   _maxHealth: 20
   _killValue: 5
-  _rateOfFire: 1.5
+  _rateOfFire: 0.5
   _movementSettings:
     _forward: 3
     _backward: 3
     _rotation: 180
   _bulletSettings:
     _prefab: {fileID: 1000012152444412, guid: bc041c35e5230fa41a26fbc602e13f18, type: 2}
-    _spawnPoint: {fileID: 4000013652853720}
+    _spawnPoint: {fileID: 0}
 --- !u!114 &114000012032654912
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -493,7 +493,12 @@ MonoBehaviour:
     _guardCaptainSettings:
       _numberOfTanksToSpawn: 5
       _tanksToSpawnPrefabs: []
-    _personality: 2
+    _shiftPhasingSettings:
+      Settings:
+        _minOpacity: 0
+        _maxOpacity: 0
+        _transitionSpeed: 0
+    _personality: 3
     _patrolMode: 0
     _patrolPoints: []
 --- !u!135 &135000013449051822
