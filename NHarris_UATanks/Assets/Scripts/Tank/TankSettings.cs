@@ -8,12 +8,15 @@ public class MovementSpeeds
     public float Backward { get { return _backward; } }
     public float Rotation { get { return _rotation; } }
 
+    [SerializeField]
     [Tooltip("Units (in meters) to move per second.")]
-    public float _forward = 3f;
+    private float _forward = 3f;
+    [SerializeField]
     [Tooltip("Units (in meters) to move per second.")]
-    public float _backward = 3f;
+    private float _backward = 3f;
+    [SerializeField]
     [Tooltip("Rotation in degrees the body should rotate.")]
-    public float _rotation = 180f;
+    private float _rotation = 180f;
 }
 
 [Serializable]
