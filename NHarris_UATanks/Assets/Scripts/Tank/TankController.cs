@@ -8,12 +8,18 @@ using UnityEngine;
 [RequireComponent(typeof(TankSettings))]
 public class TankController : BaseScript
 {
-    protected bool IsDead { get { return CurrentHealth <= 0; } }
+    public const string TOOK_DAMAGE_MESSAGE = "OnTookDamage";
+
+    public bool IsDead { get { return _currentHealth <= 0; } }
+    
+    public int CurrentHealth { get { return _currentHealth; } }
+    public int CurrentScore { get { return _currentScore; } }
 
     [SerializeField]
-    protected int CurrentHealth;
+    private int _currentHealth;
     [SerializeField]
-    protected int CurrentScore;
+    private int _currentScore;
+    private float _timeOfLastHealthGain;
 
     [SerializeField]
     private TankSettings _settings;
@@ -23,7 +29,7 @@ public class TankController : BaseScript
     {
         base.Start();
 
-        CurrentHealth = _settings.MaxHealth;
+        _currentHealth = _settings.MaxHealth;
 	}
 	
 	protected override void Update()
@@ -53,7 +59,7 @@ public class TankController : BaseScript
 
     public void TakeDamage(int amount)
     {
-        CurrentHealth -= amount;
+        _currentHealth -= amount;
     }
 
     /// <summary>
@@ -65,7 +71,26 @@ public class TankController : BaseScript
         // only players get points
         if (_settings.IsPlayer)
         {
-            CurrentScore += amount;
+            _currentScore += amount;
+        }
+    }
+
+    public void RegenerateHealth()
+    {
+        if (_timeOfLastHealthGain == 0)
+        {
+            _timeOfLastHealthGain = Time.time;
+            return;
+        }
+
+        float timeDiff = Time.time - _timeOfLastHealthGain;
+
+        // if it has been at least 1 second
+        if (timeDiff >= 1)
+        {
+            _timeOfLastHealthGain = Time.time;
+            _currentHealth += (int)(_settings.HealthRegenRate * timeDiff);
+            _currentHealth = Mathf.Clamp(_currentHealth, 0, _settings.MaxHealth);
         }
     }
 
@@ -80,6 +105,10 @@ public class TankController : BaseScript
             {
                 // notify the tank it should probably earn points.
                 bullet.Owner.GainPoints(_settings.KillValue);
+            }
+            else
+            {
+                this.BroadcastMessage(TankController.TOOK_DAMAGE_MESSAGE, bullet.Owner, SendMessageOptions.DontRequireReceiver);
             }
         }
     }

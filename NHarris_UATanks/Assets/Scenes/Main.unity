@@ -479,7 +479,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 4000012560035592, guid: 272370901210b21428b21561f4809898, type: 2}
       propertyPath: m_LocalPosition.z
-      value: 6.54
+      value: 17.9
       objectReference: {fileID: 0}
     - target: {fileID: 4000012560035592, guid: 272370901210b21428b21561f4809898, type: 2}
       propertyPath: m_LocalRotation.x
@@ -544,6 +544,16 @@ Prefab:
         type: 2}
       propertyPath: _aiSettings._delayBetweenPatrolPoints
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114000012279025492, guid: 272370901210b21428b21561f4809898,
+        type: 2}
+      propertyPath: _aiSettings._patrolMode
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 114000012279025492, guid: 272370901210b21428b21561f4809898,
+        type: 2}
+      propertyPath: _aiSettings._fleeDistance
+      value: 3
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 272370901210b21428b21561f4809898, type: 2}
@@ -613,7 +623,7 @@ Camera:
   far clip plane: 30
   field of view: 60
   orthographic: 1
-  orthographic size: 10
+  orthographic size: 20
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
@@ -634,7 +644,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 701418808}
   m_LocalRotation: {x: 0.7071068, y: -0, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: -0.81, y: 13.1, z: 3.45}
+  m_LocalPosition: {x: -10.17, y: 13.1, z: 11.73}
   m_LocalScale: {x: 0, y: 0, z: 1}
   m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
   m_Children: []

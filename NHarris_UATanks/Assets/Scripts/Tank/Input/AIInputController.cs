@@ -1,7 +1,6 @@
-﻿//using L4.Unity.Common;
+﻿using L4.Unity.Common;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public enum Personality
@@ -75,17 +74,45 @@ public class ShiftPhaserPersonalitySettings
 [Serializable]
 public class AITankSettings
 {
+    public int FleeHealthThreshold { get { return _fleeHealthThreshold; } }
     public float PatrolPointThreshold { get { return _patrolPointThreshold; } }
     /// <summary>
     /// PatrolPointThreshold squared.
     /// </summary>
     public float PatrolPointThresholdMagnitude { get { return _patrolPointThreshold * _patrolPointThreshold; } }
     public float DelayBetweenPatrolPoints { get { return _delayBetweenPatrolPoints; } }
+    public float FleeDistance
+    {
+        get
+        {
+            // French Tanks flee twice as far as normal tanks.
+            if (SelectedPersonality == Personality.FrenchTank)
+            {
+                return _fleeDistance * 2;
+            }
+            return _fleeDistance;
+        }
+    }
+    public float FleeTime
+    {
+        get
+        {
+            // French Tanks flee for twice as long as normal tanks.
+            if (SelectedPersonality == Personality.FrenchTank)
+            {
+                return _fleeTime * 2;
+            }
+            return _fleeTime;
+        }
+    }
 
     public Personality SelectedPersonality { get { return _personality; } }
     public PatrolMode SelectedPatrolMode { get { return _patrolMode; } }
     public ShiftPhaserPersonalitySettings ShiftPhasingSettings { get { return _shiftPhasingSettings; } }
 
+    [SerializeField]
+    [Tooltip("The health at which the tank will start fleeing.")]
+    private int _fleeHealthThreshold = 10;
     [SerializeField]
     [Tooltip("The distance (in meters) the tank needs to reach towards a patrol point before selecting the next one.")]
     private float _patrolPointThreshold = 10f;
@@ -98,6 +125,12 @@ public class AITankSettings
     [SerializeField]
     [Tooltip("The time (in seconds) the tank will wait before selecting and patrolling to the next patrol point.")]
     private float _delayBetweenPatrolPoints = 0f;
+    [SerializeField]
+    [Tooltip("The distance (in meters) the tank will run away from the target when below certain health threshold.")]
+    private float _fleeDistance = 10f;
+    [SerializeField]
+    [Tooltip("The time (in seconds) the tank will wait at the flee position after reaching it before going back to patrol mode.")]
+    private float _fleeTime = 10f;
 
     [SerializeField]
     private AggressivePersonalitySettings _agressiveSettings;
@@ -116,6 +149,7 @@ public class AITankSettings
     public List<Transform> PatrolPoints { get { return _patrolPoints; } }
 }
 
+[RequireComponent(typeof(TankController))]
 public class AIInputController : InputControllerBase
 {
     // Which direction in the list is it navigating through
@@ -148,6 +182,11 @@ public class AIInputController : InputControllerBase
     private PatrolDirection _patrolDirection = PatrolDirection.Forward;
     [SerializeField]
     private AITankSettings _aiSettings;
+    [SerializeField]
+    private Transform _currentTarget;
+    private Transform _fleeTarget;
+    [SerializeField]
+    private TankController _controller;
 
     protected override void Awake()
     {
@@ -168,8 +207,20 @@ public class AIInputController : InputControllerBase
 
     protected override void Update()
     {
+        // TODO: Check for player sight/sound
+
+        HealthUpdate();
+
         switch (_currentActionMode)
         {
+            case ActionMode.Chase:
+                ChaseTargetUpdate();
+                break;
+
+            case ActionMode.Flee:
+                FleeTargetUpdate();
+                break;
+
             case ActionMode.Patrol:
             default:
                 if (_aiSettings.PatrolPoints.Count > 0)
@@ -177,6 +228,48 @@ public class AIInputController : InputControllerBase
                     PatrolUpdate();
                 }
                 break;
+        }
+    }
+
+    protected void OnDestroy()
+    {
+        // if this hasn't been destroyed through normal gameplay, clean up
+        if (_fleeTarget != null)
+        {
+            Destroy(_fleeTarget.gameObject);
+        }
+    }
+
+    protected override void CheckDependencies()
+    {
+        base.CheckDependencies();
+
+        this.CheckAndAssignIfDependencyIsNull(ref _controller);
+    }
+
+    // Handler method for the TankController message broadcast when hit by a bullet
+    public void OnTookDamage(TankController shooter)
+    {
+        Transform shooterTransform = shooter.transform;
+
+        // if our current target is not the shooter, switch targets
+        if (_currentTarget != shooterTransform)
+        {
+            _currentTarget = shooterTransform;
+        }
+    }
+
+    private void HealthUpdate()
+    {
+        if (_currentActionMode != ActionMode.Flee &&
+            _controller.CurrentHealth <= _aiSettings.FleeHealthThreshold)
+        {
+            // assign the new state
+            _currentActionMode = ActionMode.Flee;
+
+            // reset variables needed for the flee state
+            _didSetTimeReachedPatrolPoint = false;
+            _timeReachedPatrolPoint = 0;
         }
     }
 
@@ -279,6 +372,69 @@ public class AIInputController : InputControllerBase
                     _currentPatrolPointIndex++;
                 }
                 break;
+        }
+    }
+
+    private void ChaseTargetUpdate()
+    {
+        MotorComponent.RotateTowards(_currentTarget, Settings.MovementSettings.Forward);
+        MotorComponent.Move(Settings.MovementSettings.Forward);
+
+        if (CanShoot())
+        {
+            Shoot();
+        }
+    }
+
+    private void FleeTargetUpdate()
+    {
+        // if the target hasn't been set and we're not keeping track of time that means we just hit the Flee mode
+        if (_fleeTarget == null && _timeReachedPatrolPoint == 0)
+        {
+            // get the position of the "invisible target" for fleeing by inverting the vector from the target
+            Vector3 vectorAwayFromTarget = (_currentTarget.position - MyTransform.position) * -1;
+            // normalize the fector to work with
+            vectorAwayFromTarget.Normalize();
+            vectorAwayFromTarget *= _aiSettings.FleeDistance;
+
+            // Add the current position and the calculated vector distance away to get the final world space position
+            // and set it to the new gameobject's position
+            _fleeTarget = new GameObject(this.gameObject.name + "_FleeTarget").transform;
+            _fleeTarget.position = vectorAwayFromTarget + MyTransform.position;
+        }
+
+        // if the tank has reached its flee point
+        if (GetDistanceFromObject(_fleeTarget) <= _aiSettings.PatrolPointThresholdMagnitude)
+        {
+            // we're reusing this variable
+            // TODO: review if this should be changed later to avoid bugs...
+            if (_timeReachedPatrolPoint == 0)
+            {
+                _timeReachedPatrolPoint = Time.time;
+            }
+            else
+            {
+                // if enough time has passed, go back to patrolling
+                if (Time.time - _timeReachedPatrolPoint >= _aiSettings.FleeTime)
+                {
+                    // destroy the gameobject
+                    Destroy(_fleeTarget.gameObject);
+
+                    _currentActionMode = ActionMode.Patrol;
+
+                    // reset this variable
+                    _timeReachedPatrolPoint = 0;
+                }
+                else // regain health
+                {
+                    _controller.RegenerateHealth();
+                }
+            }
+        }
+        else // we need to move towards the flee target still
+        {
+            MotorComponent.RotateTowards(_fleeTarget, Settings.MovementSettings.Rotation);
+            MotorComponent.Move(Settings.MovementSettings.Forward);
         }
     }
 
