@@ -105,6 +105,7 @@ public class AITankSettings
             return _fleeTime;
         }
     }
+    public float MaxTimeDoingPathfinding { get { return _maxTimeDoingPathfinding; } }
 
     public Personality SelectedPersonality { get { return _personality; } }
     public PatrolMode SelectedPatrolMode { get { return _patrolMode; } }
@@ -131,6 +132,8 @@ public class AITankSettings
     [SerializeField]
     [Tooltip("The time (in seconds) the tank will wait at the flee position after reaching it before going back to patrol mode.")]
     private float _fleeTime = 10f;
+    [SerializeField]
+    private float _maxTimeDoingPathfinding = 3f;
 
     [SerializeField]
     private AggressivePersonalitySettings _agressiveSettings;
@@ -154,6 +157,8 @@ public class AIInputController : InputControllerBase
 {
     // Which direction in the list is it navigating through
     private enum PatrolDirection { Forward, Backwards }
+    // Which stage of movement is happening
+    private enum MovementMode { Normal, Pathfinding }
 
     public bool HasSeenPlayer
     {
@@ -177,9 +182,12 @@ public class AIInputController : InputControllerBase
 
     private int _currentPatrolPointIndex;
     private float _timeReachedPatrolPoint;
+    private float _pathfindingExitTime;
     
     private ActionMode _currentActionMode = ActionMode.Patrol;
     private PatrolDirection _patrolDirection = PatrolDirection.Forward;
+    [SerializeField]
+    private MovementMode _currentMovementMode = MovementMode.Normal;
     [SerializeField]
     private AITankSettings _aiSettings;
     [SerializeField]
@@ -300,13 +308,27 @@ public class AIInputController : InputControllerBase
         // otherwise we need to rotate/move towards the target
         else
         {
-            if (!IsLookingAtPatrolPoint(currentPoint))
+            if (_currentMovementMode == MovementMode.Normal)
             {
-                MotorComponent.RotateTowards(currentPoint, Settings.MovementSettings.Rotation);
+                if (!IsLookingAtPatrolPoint(currentPoint))
+                {
+                    MotorComponent.RotateTowards(currentPoint, Settings.MovementSettings.Rotation);
+                }
+                else
+                {
+                    if (CanMove(Settings.MovementSettings.Forward))
+                    {
+                        MotorComponent.Move(Settings.MovementSettings.Forward);
+                    }
+                    else
+                    {
+                        _currentMovementMode = MovementMode.Pathfinding;
+                    }
+                }
             }
             else
             {
-                MotorComponent.Move(Settings.MovementSettings.Forward);
+                DoPathfinding();
             }
         }
     }
@@ -377,12 +399,26 @@ public class AIInputController : InputControllerBase
 
     private void ChaseTargetUpdate()
     {
-        MotorComponent.RotateTowards(_currentTarget, Settings.MovementSettings.Forward);
-        MotorComponent.Move(Settings.MovementSettings.Forward);
-
-        if (CanShoot())
+        if (_currentMovementMode == MovementMode.Normal)
         {
-            Shoot();
+            if (CanMove(Settings.MovementSettings.Forward))
+            {
+                MotorComponent.RotateTowards(_currentTarget, Settings.MovementSettings.Forward);
+                MotorComponent.Move(Settings.MovementSettings.Forward);
+
+                if (CanShoot())
+                {
+                    Shoot();
+                }
+            }
+            else
+            {
+                _currentMovementMode = MovementMode.Pathfinding;
+            }
+        }
+        else
+        {
+            DoPathfinding();
         }
     }
 
@@ -433,8 +469,44 @@ public class AIInputController : InputControllerBase
         }
         else // we need to move towards the flee target still
         {
-            MotorComponent.RotateTowards(_fleeTarget, Settings.MovementSettings.Rotation);
+            if (_currentMovementMode == MovementMode.Normal)
+            {
+                if (CanMove(Settings.MovementSettings.Forward))
+                {
+                    MotorComponent.RotateTowards(_fleeTarget, Settings.MovementSettings.Rotation);
+                    MotorComponent.Move(Settings.MovementSettings.Forward);
+                }
+                else
+                {
+                    _currentMovementMode = MovementMode.Pathfinding;
+                }
+            }
+            else
+            {
+                DoPathfinding();
+            }
+        }
+    }
+
+    private void DoPathfinding()
+    {
+        MotorComponent.Rotate(-1 * Settings.MovementSettings.Rotation);
+
+        if (CanMove(Settings.MovementSettings.Forward * Time.time))
+        {
+            if (_pathfindingExitTime == 0)
+            {
+                _pathfindingExitTime = _aiSettings.MaxTimeDoingPathfinding;
+            }
+
             MotorComponent.Move(Settings.MovementSettings.Forward);
+            _pathfindingExitTime -= Time.deltaTime;
+
+            if (_pathfindingExitTime <= 0)
+            {
+                _pathfindingExitTime = 0;
+                _currentMovementMode = MovementMode.Normal;
+            }
         }
     }
 
@@ -443,5 +515,25 @@ public class AIInputController : InputControllerBase
         Quaternion directions = Quaternion.LookRotation(pointToCheck.position - MyTransform.position);
 
         return directions == MyTransform.rotation;
+    }
+
+    private bool CanMove(float speed)
+    {
+        RaycastHit ray;
+
+        if (Physics.Raycast(MyTransform.position, MyTransform.forward, out ray, speed))
+        {
+            GameObject obj = ray.collider.gameObject;
+
+            // if the object hit is not a player, flee target, or projectile, cannot move forward
+            if (!obj.IsOnSameLayer(ProjectSettings.Layers.Player) &&
+                !obj.IsOnSameLayer(ProjectSettings.Layers.Projectiles) &&
+                (_fleeTarget != null && obj != _fleeTarget.gameObject))
+            {
+                return false;
+            }
+        }
+        // return true in all other cases
+        return true;
     }
 }
