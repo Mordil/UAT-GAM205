@@ -211,6 +211,14 @@ public class AIInputController : InputControllerBase
                 GetComponent<OpacityPhaser>().Initialize(_aiSettings.ShiftPhasingSettings.Settings);
             }
         }
+
+        if (_aiSettings.SelectedPersonality == Personality.FrenchTank)
+        {
+            // 
+            Vector3 newScale = MyTransform.localScale * .5f;
+            newScale.y = 1;
+            MyTransform.localScale = newScale;
+        }
     }
 
     protected override void Update()

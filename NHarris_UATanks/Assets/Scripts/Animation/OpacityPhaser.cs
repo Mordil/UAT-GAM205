@@ -6,9 +6,14 @@ using UnityEngine;
 [Serializable]
 public class OpacityPhaserSettings
 {
+    public bool IsPaused { get { return _pause; } }
+
     public float MinOpacity { get { return _minOpacity; } }
     public float MaxOpacity { get { return _maxOpacity; } }
     public float TransitionSpeed { get { return _transitionSpeed; } }
+
+    [SerializeField]
+    private bool _pause;
 
     [SerializeField]
     [Range(0, 1)]
@@ -18,9 +23,11 @@ public class OpacityPhaserSettings
     private float _maxOpacity = 1f;
     [SerializeField]
     [Tooltip("The speed (in seconds) at which the opacity value will change.")]
+    [Range(0, 1)]
     private float _transitionSpeed = .1f;
 }
 
+[AddComponentMenu("Animation/Effects/Opacity Phasing")]
 public class OpacityPhaser : MonoBehaviour
 {
     private enum PhaseShift { Visible, Invisible }
@@ -49,35 +56,38 @@ public class OpacityPhaser : MonoBehaviour
 	
 	private void Update()
     {
-        Color colorRef;
-        Func<float> getTransitionValue = () => { return _settings.TransitionSpeed * Time.deltaTime; };
-
-        foreach(var material in _meshMaterialsList)
+        if (!_settings.IsPaused)
         {
-            if (_currentPhaseShift == PhaseShift.Invisible)
+            Color colorRef;
+            Func<float> getTransitionValue = () => { return _settings.TransitionSpeed * Time.deltaTime; };
+
+            foreach (var material in _meshMaterialsList)
             {
-                if (material.color.a <= _settings.MinOpacity)
+                if (_currentPhaseShift == PhaseShift.Invisible)
                 {
-                    _currentPhaseShift = PhaseShift.Visible;
+                    if (material.color.a <= _settings.MinOpacity)
+                    {
+                        _currentPhaseShift = PhaseShift.Visible;
+                    }
+                    else
+                    {
+                        colorRef = material.color;
+                        colorRef.a -= getTransitionValue();
+                        material.color = colorRef;
+                    }
                 }
                 else
                 {
-                    colorRef = material.color;
-                    colorRef.a -= getTransitionValue();
-                    material.color = colorRef;
-                }
-            }
-            else
-            {
-                if (material.color.a >= _settings.MaxOpacity)
-                {
-                    _currentPhaseShift = PhaseShift.Invisible;
-                }
-                else
-                {
-                    colorRef = material.color;
-                    colorRef.a += getTransitionValue();
-                    material.color = colorRef;
+                    if (material.color.a >= _settings.MaxOpacity)
+                    {
+                        _currentPhaseShift = PhaseShift.Invisible;
+                    }
+                    else
+                    {
+                        colorRef = material.color;
+                        colorRef.a += getTransitionValue();
+                        material.color = colorRef;
+                    }
                 }
             }
         }

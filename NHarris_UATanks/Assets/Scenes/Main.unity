@@ -513,12 +513,12 @@ Prefab:
     - target: {fileID: 114000012279025492, guid: 272370901210b21428b21561f4809898,
         type: 2}
       propertyPath: _aiSettings._shiftPhasingSettings.Settings._transitionSpeed
-      value: 0.25
+      value: 0.1
       objectReference: {fileID: 0}
     - target: {fileID: 114000012279025492, guid: 272370901210b21428b21561f4809898,
         type: 2}
       propertyPath: _aiSettings._personality
-      value: 2
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 114000012279025492, guid: 272370901210b21428b21561f4809898,
         type: 2}
@@ -539,7 +539,7 @@ Prefab:
         type: 2}
       propertyPath: _aiSettings._patrolPoints.Array.data[3]
       value: 
-      objectReference: {fileID: 1090861212}
+      objectReference: {fileID: 0}
     - target: {fileID: 114000012279025492, guid: 272370901210b21428b21561f4809898,
         type: 2}
       propertyPath: _aiSettings._delayBetweenPatrolPoints
