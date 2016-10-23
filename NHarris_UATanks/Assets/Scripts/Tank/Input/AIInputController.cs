@@ -33,7 +33,7 @@ public enum ActionMode { Chase, Flee, Patrol }
 /// <summary>
 /// Represents the style of patrol movement the tank follows.
 /// </summary>
-public enum PatrolMode { Loop, Sequence }
+public enum PatrolMode { Loop, Sequence, NoRepeat }
 
 [Serializable]
 public class AggressivePersonalitySettings
@@ -80,6 +80,7 @@ public class AITankSettings
     /// PatrolPointThreshold squared.
     /// </summary>
     public float PatrolPointThresholdMagnitude { get { return _patrolPointThreshold * _patrolPointThreshold; } }
+    public float DelayBetweenPatrolPoints { get { return _delayBetweenPatrolPoints; } }
 
     public Personality SelectedPersonality { get { return _personality; } }
     public PatrolMode SelectedPatrolMode { get { return _patrolMode; } }
@@ -94,6 +95,9 @@ public class AITankSettings
     [SerializeField]
     [Tooltip("The angle (in degrees) the tank can see, with the halfway point being forward.")]
     private float _lineOfSightAngle = 120f;
+    [SerializeField]
+    [Tooltip("The time (in seconds) the tank will wait before selecting and patrolling to the next patrol point.")]
+    private float _delayBetweenPatrolPoints = 0f;
 
     [SerializeField]
     private AggressivePersonalitySettings _agressiveSettings;
@@ -135,8 +139,10 @@ public class AIInputController : InputControllerBase
 
     private bool _hasSeenPlayerAlready;
     private bool _hasSeenPlayer;
+    private bool _didSetTimeReachedPatrolPoint;
 
     private int _currentPatrolPointIndex;
+    private float _timeReachedPatrolPoint;
     
     private ActionMode _currentActionMode = ActionMode.Patrol;
     private PatrolDirection _patrolDirection = PatrolDirection.Forward;
@@ -178,27 +184,42 @@ public class AIInputController : InputControllerBase
     {
         Transform currentPoint = _aiSettings.PatrolPoints[_currentPatrolPointIndex];
 
-        if (!IsLookingAtPatrolPoint(currentPoint))
+        // if the tank is within range of the target, switch to the next
+        if (GetDistanceFromObject(currentPoint) <= _aiSettings.PatrolPointThresholdMagnitude)
         {
-            MotorComponent.RotateTowards(currentPoint, Settings.MovementSettings.Rotation);
+            // if we haven't set it yet, do so now for PatrolPointUpdate() delay logic
+            if (!_didSetTimeReachedPatrolPoint)
+            {
+                _didSetTimeReachedPatrolPoint = true;
+                _timeReachedPatrolPoint = Time.time;
+            }
+
+            // if enough time has passed after reaching the patrol point, update to the next
+            if (Time.time - _timeReachedPatrolPoint >= _aiSettings.DelayBetweenPatrolPoints)
+            {
+                // reset the variables as we're about to change patrol points
+                _didSetTimeReachedPatrolPoint = false;
+                _timeReachedPatrolPoint = 0;
+
+                PatrolPointUpdate(currentPoint);
+            }
         }
+        // otherwise we need to rotate/move towards the target
         else
         {
-            MotorComponent.Move(Settings.MovementSettings.Forward);
+            if (!IsLookingAtPatrolPoint(currentPoint))
+            {
+                MotorComponent.RotateTowards(currentPoint, Settings.MovementSettings.Rotation);
+            }
+            else
+            {
+                MotorComponent.Move(Settings.MovementSettings.Forward);
+            }
         }
-
-        PatrolPointUpdate(currentPoint);
     }
 
     private void PatrolPointUpdate(Transform currentPoint)
     {
-        // if the tank is too far from the patrol point, the next one shouldn't be selected
-        if (GetDistanceFromObject(currentPoint) > _aiSettings.PatrolPointThresholdMagnitude)
-        {
-            return;
-        }
-
-        // otherwise, we need to select the next point based on the patrol mode
         switch (_aiSettings.SelectedPatrolMode)
         {
             case PatrolMode.Sequence:
@@ -228,6 +249,19 @@ public class AIInputController : InputControllerBase
                         // otherwise change direction for the next loop
                         _patrolDirection = PatrolDirection.Forward;
                     }
+                }
+                break;
+
+            case PatrolMode.NoRepeat:
+                // if the current index is the last one, just return - there are no updates to do
+                if (_currentPatrolPointIndex == _aiSettings.PatrolPoints.Count - 1)
+                {
+                    return;
+                }
+                // otherwise, increment the index
+                else
+                {
+                    _currentPatrolPointIndex++;
                 }
                 break;
 
