@@ -12,7 +12,7 @@ public enum Personality
     /// <summary>
     /// Spawns additional tanks when first spotting the player.
     /// </summary>
-    GuardCaptain,
+    //GuardCaptain,
     /// <summary>
     /// Patrols and chases the player if seen for a short duration.
     /// </summary>
@@ -55,21 +55,16 @@ public class AggressivePersonalitySettings
     private float _fireRateIncrease;
 }
 
-[Serializable]
-public class GuardCaptainPersonalitySettings
-{
-    [SerializeField]
-    private int _numberOfTanksToSpawn = 5;
+// This feature is being tabled for now due to time constraints. If I have extra time in later weeks, I'll re-add this.
+//[Serializable]
+//public class GuardCaptainPersonalitySettings
+//{
+//    [SerializeField]
+//    private int _numberOfTanksToSpawn = 5;
 
-    [SerializeField]
-    private List<GameObject> _tanksToSpawnPrefabs;
-}
-
-[Serializable]
-public class ShiftPhaserPersonalitySettings
-{
-    public OpacityPhaserSettings Settings;
-}
+//    [SerializeField]
+//    private List<GameObject> _tanksToSpawnPrefabs;
+//}
 
 [Serializable]
 public class AITankSettings
@@ -106,10 +101,11 @@ public class AITankSettings
         }
     }
     public float MaxTimeDoingPathfinding { get { return _maxTimeDoingPathfinding; } }
+    public float DistanceToShoot { get { return _distanceToShoot; } }
 
     public Personality SelectedPersonality { get { return _personality; } }
     public PatrolMode SelectedPatrolMode { get { return _patrolMode; } }
-    public ShiftPhaserPersonalitySettings ShiftPhasingSettings { get { return _shiftPhasingSettings; } }
+    public OpacityPhaserSettings ShiftPhasingSettings { get { return _shiftPhasingSettings; } }
 
     [SerializeField]
     [Tooltip("The health at which the tank will start fleeing.")]
@@ -124,6 +120,9 @@ public class AITankSettings
     [Tooltip("The angle (in degrees) the tank can see, with the halfway point being forward.")]
     private float _lineOfSightAngle = 120f;
     [SerializeField]
+    [Tooltip("The distance a player must be within to be shot at.")]
+    private float _distanceToShoot = 20f;
+    [SerializeField]
     [Tooltip("The time (in seconds) the tank will wait before selecting and patrolling to the next patrol point.")]
     private float _delayBetweenPatrolPoints = 0f;
     [SerializeField]
@@ -137,10 +136,10 @@ public class AITankSettings
 
     [SerializeField]
     private AggressivePersonalitySettings _agressiveSettings;
+    //[SerializeField]
+    //private GuardCaptainPersonalitySettings _guardCaptainSettings;
     [SerializeField]
-    private GuardCaptainPersonalitySettings _guardCaptainSettings;
-    [SerializeField]
-    private ShiftPhaserPersonalitySettings _shiftPhasingSettings;
+    private OpacityPhaserSettings _shiftPhasingSettings;
     [SerializeField]
     private Personality _personality = Personality.Standard;
     [SerializeField]
@@ -152,6 +151,7 @@ public class AITankSettings
     public List<Transform> PatrolPoints { get { return _patrolPoints; } }
 }
 
+[HelpURL("Assets/Scripts/Tank/README.md")]
 [RequireComponent(typeof(TankController))]
 public class AIInputController : InputControllerBase
 {
@@ -208,7 +208,7 @@ public class AIInputController : InputControllerBase
             if (GetComponent<OpacityPhaser>() == null)
             {
                 this.gameObject.AddComponent<OpacityPhaser>();
-                GetComponent<OpacityPhaser>().Initialize(_aiSettings.ShiftPhasingSettings.Settings);
+                GetComponent<OpacityPhaser>().Initialize(_aiSettings.ShiftPhasingSettings);
             }
         }
 
@@ -225,7 +225,10 @@ public class AIInputController : InputControllerBase
     {
         // TODO: Check for player sight/sound
 
-        HealthUpdate();
+        if (_aiSettings.SelectedPersonality != Personality.Aggressive)
+        {
+            HealthUpdate();
+        }
 
         switch (_currentActionMode)
         {
@@ -414,7 +417,7 @@ public class AIInputController : InputControllerBase
                 MotorComponent.RotateTowards(_currentTarget, Settings.MovementSettings.Forward);
                 MotorComponent.Move(Settings.MovementSettings.Forward);
 
-                if (CanShoot())
+                if (CanShoot() && GetDistanceFromObject(_currentTarget) <= _aiSettings.DistanceToShoot * _aiSettings.DistanceToShoot)
                 {
                     Shoot();
                 }
