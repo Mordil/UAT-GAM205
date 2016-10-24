@@ -1,6 +1,7 @@
 ﻿using L4.Unity.Common;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public enum Personality
@@ -102,6 +103,7 @@ public class AITankSettings
     }
     public float MaxTimeDoingPathfinding { get { return _maxTimeDoingPathfinding; } }
     public float DistanceToShoot { get { return _distanceToShoot; } }
+    public float LineOfSightAngle { get { return _lineOfSightAngle; } }
 
     public Personality SelectedPersonality { get { return _personality; } }
     public PatrolMode SelectedPatrolMode { get { return _patrolMode; } }
@@ -184,6 +186,7 @@ public class AIInputController : InputControllerBase
     private float _timeReachedPatrolPoint;
     private float _pathfindingExitTime;
     
+    [SerializeField]
     private ActionMode _currentActionMode = ActionMode.Patrol;
     private PatrolDirection _patrolDirection = PatrolDirection.Forward;
     [SerializeField]
@@ -195,7 +198,11 @@ public class AIInputController : InputControllerBase
     private Transform _fleeTarget;
     [SerializeField]
     private TankController _controller;
+    [SerializeField]
+    [Tooltip("The trigger sphere collider used for hearing detection and FOV distance.")]
+    private SphereCollider _triggerSphereCollider;
 
+    #region Unity
     protected override void Awake()
     {
         // because a tank can be instantiated at runtime, start won't be called, so we do it ourselves
@@ -219,12 +226,20 @@ public class AIInputController : InputControllerBase
             newScale.y = 1;
             MyTransform.localScale = newScale;
         }
+
+        // if the trigger isn't selected, find the first component that is a trigger
+        if (_triggerSphereCollider == null)
+        {
+            _triggerSphereCollider = GetComponents<SphereCollider>()
+                .Where(x => x.isTrigger)
+                .First();
+        }
+
+        _triggerSphereCollider.radius = _aiSettings.DistanceToShoot;
     }
 
     protected override void Update()
     {
-        // TODO: Check for player sight/sound
-
         if (_aiSettings.SelectedPersonality != Personality.Aggressive)
         {
             HealthUpdate();
@@ -233,6 +248,12 @@ public class AIInputController : InputControllerBase
         switch (_currentActionMode)
         {
             case ActionMode.Chase:
+                if (_currentTarget == null)
+                {
+                    _currentActionMode = ActionMode.Patrol;
+                    return;
+                }
+
                 ChaseTargetUpdate();
                 break;
 
@@ -258,6 +279,21 @@ public class AIInputController : InputControllerBase
             Destroy(_fleeTarget.gameObject);
         }
     }
+
+    protected virtual void OnTriggerEnter(Collider otherObj)
+    {
+        if (otherObj.gameObject.IsOnSameLayer(ProjectSettings.Layers.Player))
+        {
+            Transform possibleTarget = otherObj.gameObject.transform;
+
+            if (IsTargetWithinView(possibleTarget))
+            {
+                _currentTarget = possibleTarget;
+                _currentActionMode = ActionMode.Chase;
+            }
+        }
+    }
+    #endregion
 
     protected override void CheckDependencies()
     {
@@ -414,10 +450,17 @@ public class AIInputController : InputControllerBase
         {
             if (CanMove(Settings.MovementSettings.Forward))
             {
-                MotorComponent.RotateTowards(_currentTarget, Settings.MovementSettings.Forward);
-                MotorComponent.Move(Settings.MovementSettings.Forward);
+                if (!IsLookingAtPatrolPoint(_currentTarget))
+                {
+                    MotorComponent.RotateTowards(_currentTarget, Settings.MovementSettings.Rotation);
+                }
 
-                if (CanShoot() && GetDistanceFromObject(_currentTarget) <= _aiSettings.DistanceToShoot * _aiSettings.DistanceToShoot)
+                if (GetDistanceFromObject(_currentTarget) >= _aiSettings.PatrolPointThresholdMagnitude)
+                {
+                    MotorComponent.Move(Settings.MovementSettings.Forward);
+                }
+
+                if (CanShoot())
                 {
                     Shoot();
                 }
@@ -536,15 +579,40 @@ public class AIInputController : InputControllerBase
         {
             GameObject obj = ray.collider.gameObject;
 
-            // if the object hit is not a player, flee target, or projectile, cannot move forward
-            if (!obj.IsOnSameLayer(ProjectSettings.Layers.Player) &&
-                !obj.IsOnSameLayer(ProjectSettings.Layers.Projectiles) &&
-                (_fleeTarget != null && obj != _fleeTarget.gameObject))
-            {
-                return false;
-            }
+            // return if the object hit was a player, flee target, or projectile (these are non blockers)
+            return obj.IsOnSameLayer(ProjectSettings.Layers.Player) ||
+                obj.IsOnSameLayer(ProjectSettings.Layers.Projectiles) ||
+                (_fleeTarget != null && obj == _fleeTarget.gameObject);
         }
         // return true in all other cases
         return true;
+    }
+
+    private bool IsTargetWithinView(Transform target)
+    {
+        Vector3 targetPosition = target.position;
+        Vector3 vectorToTarget = targetPosition - MyTransform.position;
+
+        float angleToTarget = Vector3.Angle(vectorToTarget, MyTransform.forward);
+
+        if (angleToTarget <= _aiSettings.LineOfSightAngle)
+        {
+            Ray ray = new Ray();
+
+            ray.origin = MyTransform.position;
+            ray.direction = vectorToTarget;
+
+            RaycastHit hit;
+
+            if (Physics.Raycast(ray, out hit, _aiSettings.DistanceToShoot))
+            {
+                if (hit.collider.gameObject.IsOnSameLayer(ProjectSettings.Layers.Player))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }
