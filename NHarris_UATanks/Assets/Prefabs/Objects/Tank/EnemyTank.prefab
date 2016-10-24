@@ -444,14 +444,14 @@ MonoBehaviour:
   _maxHealth: 20
   _healthRegenRate: 2
   _killValue: 5
-  _rateOfFire: 0.5
+  _rateOfFire: 3
   _movementSettings:
     _forward: 3
     _backward: 3
     _rotation: 180
   _bulletSettings:
     _prefab: {fileID: 1000012152444412, guid: bc041c35e5230fa41a26fbc602e13f18, type: 2}
-    _spawnPoint: {fileID: 0}
+    _spawnPoint: {fileID: 4000013652853720}
 --- !u!114 &114000012032654912
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -481,35 +481,38 @@ MonoBehaviour:
   MotorComponent: {fileID: 0}
   ShooterComponent: {fileID: 0}
   MyTransform: {fileID: 0}
+  _maxTimeDoingPathfinding: 3
+  _maxTimeToChase: 3
+  _minDistanceFromTarget: 2
+  _currentActionMode: 2
   _currentMovementMode: 0
-  _aiSettings:
-    _fleeHealthThreshold: 10
-    _patrolPointThreshold: 1.5
-    _hearingDistance: 3
-    _lineOfSightAngle: 120
-    _distanceToShoot: 20
-    _delayBetweenPatrolPoints: 0
-    _fleeDistance: 10
-    _fleeTime: 10
-    _maxTimeDoingPathfinding: 3
-    _agressiveSettings:
-      _increaseSpeed: 0
-      _increaseHealth: 0
-      _increaseFireRate: 0
-      _speedIncreaseValue: 0
-      _healthIncreaseValue: 0
-      _fireRateIncrease: 0
-    _shiftPhasingSettings:
-      _pause: 0
-      _minOpacity: 0
-      _maxOpacity: 1
-      _transitionSpeed: 0.1
-    _personality: 3
-    _patrolMode: 0
-    _patrolPoints: []
+  _personality: 1
   _currentTarget: {fileID: 0}
-  _controller: {fileID: 0}
-  _triggerSphereCollider: {fileID: 0}
+  _controller: {fileID: 114000010808868774}
+  _shiftPhasingSettings:
+    _pause: 0
+    _minOpacity: 0
+    _maxOpacity: 1
+    _transitionSpeed: 0.45
+  _fleeSettings:
+    _healthThresholdToFlee: 10
+    _fleeDistance: 10
+    _fleeTime: 5
+    _fleeTarget: {fileID: 0}
+  _patrolSettings:
+    _currentPatrolPointIndex: 0
+    _patrolPointThreshold: 2
+    _delayBetweenPatrolPoints: 1.5
+    _patrolStyle: 0
+    _patrolDirection: 0
+    _patrolPoints: []
+  _visionSettings:
+    _hearingDistance: 5
+    _lineOfSightAngle: 45
+    _maxTimeToListen: 5
+    _listenTarget: {fileID: 0}
+  _triggerSphereCollider: {fileID: 135000013275635472}
+  _stationaryTankColor: {r: 1, g: 0.51724136, b: 0, a: 1}
 --- !u!135 &135000013275635472
 SphereCollider:
   m_ObjectHideFlags: 1
