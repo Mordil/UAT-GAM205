@@ -31,8 +31,14 @@ public class TankController : BaseScript
 
         _currentHealth = _settings.MaxHealth;
 	}
-	
-	protected override void Update()
+
+    protected override void Awake()
+    {
+        // not all tanks will be set up at start, so we call it here explicitly
+        Start();
+    }
+
+    protected override void Update()
     {
         if (IsDead)
         {
@@ -40,7 +46,7 @@ public class TankController : BaseScript
         }
 	}
 
-    protected virtual void OnTriggerEnter(Collider otherObj)
+    protected virtual void OnCollisionEnter(Collision otherObj)
     {
         // if the tank was hit by a bullet
         if (otherObj.gameObject.IsOnSameLayer(ProjectSettings.Layers.Projectiles))

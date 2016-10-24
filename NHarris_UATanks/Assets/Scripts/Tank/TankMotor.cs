@@ -57,6 +57,12 @@ public class TankMotor : BaseScript
     /// <param name="speed">The rotation speed in angles per second.</param>
     public void RotateTowards(Transform target, float speed)
     {
+        // sanity check to avoid console errors
+        if (target == null)
+        {
+            return;
+        }
+
         Vector3 rotateVector = target.position - _bodyTransform.position;
         Quaternion rotationDirections = Quaternion.LookRotation(rotateVector);
         _bodyTransform.rotation = Quaternion.RotateTowards(_bodyTransform.rotation, rotationDirections, speed * Time.deltaTime);

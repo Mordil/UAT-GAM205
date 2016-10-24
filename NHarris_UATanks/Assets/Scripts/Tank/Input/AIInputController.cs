@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public enum ActionMode { Chase, Flee, Patrol }
+public enum ActionMode { Chase, Flee, Patrol, Listening }
 
 /// <summary>
 /// Represents the style of patrol movement the tank follows.
@@ -229,12 +229,54 @@ public class AIVisionSettings
     public float HearingDistance { get { return _hearingDistance; } }
     public float LineOfSightAngle { get { return _lineOfSightAngle; } }
 
+    public Transform Target { get { return _listenTarget; } }
+
+    private float _timeStartedListening;
     [SerializeField]
     [Tooltip("The distance (in meters) the tank can hear the player. This also determines how far the tank can see.")]
     private float _hearingDistance = 20f;
     [SerializeField]
     [Tooltip("The angle (in degrees) the tank can see, with the halfway point being forward.")]
     private float _lineOfSightAngle = 120f;
+    [SerializeField]
+    [Tooltip("The time (in seconds) the tank will spend listening for a target once it hears it, before going back to patrolling")]
+    private float _maxTimeToListen;
+
+    [ReadOnly]
+    [SerializeField]
+    private Transform _listenTarget;
+
+    public void ListenForTarget(Vector3 position)
+    {
+        _listenTarget = new GameObject(GetHashCode() + "_ListenTarget").transform;
+        _listenTarget.position = position;
+    }
+
+    public void Reset()
+    {
+        _listenTarget = null;
+        _timeStartedListening = 0;
+    }
+
+    public bool HasFinishedListening()
+    {
+        // if we haven't set it yet, do so and return false as we just started
+        if (_timeStartedListening == 0)
+        {
+            _timeStartedListening = Time.time;
+            return false;
+        }
+
+        // if enough time has passed, destroy the object and return true as we're done listening
+        if (Time.time - _timeStartedListening >= _maxTimeToListen)
+        {
+            UnityEngine.Object.Destroy(_listenTarget.gameObject);
+            return true;
+        }
+
+        // otherwise, return false
+        return false;
+    }
 }
 
 [HelpURL("Assets/Scripts/Tank/README.md")]
@@ -321,7 +363,7 @@ public class AIInputController : InputControllerBase
     protected override void Awake()
     {
         // because a tank can be instantiated at runtime, start won't be called, so we do it ourselves
-        base.Start();
+        Start();
 
         DoPersonalitySetup();
 
@@ -339,6 +381,18 @@ public class AIInputController : InputControllerBase
 
     protected override void Update()
     {
+        // if we're not already chasing, or if we're not fleeing, check for vision
+        // of the current target
+        if (_currentActionMode != ActionMode.Chase &&
+            _currentActionMode != ActionMode.Flee)
+        {
+            if (IsTargetWithinView(_currentTarget))
+            {
+                _visionSettings.Reset();
+                GoToMode(ActionMode.Chase);
+            }
+        }
+
         // aggressive tanks don't flee
         if (_personality != Personality.Aggressive)
         {
@@ -356,6 +410,10 @@ public class AIInputController : InputControllerBase
                 FleeTargetUpdate();
                 break;
 
+            case ActionMode.Listening:
+                ListeningUpdate();
+                break;
+
             case ActionMode.Patrol:
             default:
                 // stationary targets don't patrol
@@ -369,10 +427,16 @@ public class AIInputController : InputControllerBase
 
     protected virtual void OnDestroy()
     {
-        // if this hasn't been destroyed through normal gameplay, manually clean it up
+        // if these hasn't been destroyed through normal gameplay, manually clean it up
+
         if (_fleeSettings.Target != null)
         {
             Destroy(_fleeSettings.Target.gameObject);
+        }
+
+        if (_visionSettings.Target != null)
+        {
+            Destroy(_visionSettings.Target.gameObject);
         }
     }
 
@@ -381,25 +445,33 @@ public class AIInputController : InputControllerBase
         if (otherObj.gameObject.IsOnSameLayer(ProjectSettings.Layers.Player))
         {
             Transform possibleTarget = otherObj.gameObject.transform;
+            _currentTarget = possibleTarget;
 
             if (IsTargetWithinView(possibleTarget))
             {
-                _currentTarget = possibleTarget;
                 GoToMode(ActionMode.Chase);
+            }
+            else
+            {
+                _visionSettings.ListenForTarget(possibleTarget.position);
+                GoToMode(ActionMode.Listening);
             }
         }
     }
 
     protected virtual void OnTriggerExit(Collider otherObj)
     {
-        GameObject obj = otherObj.gameObject;
-
-        if (obj.IsOnSameLayer(ProjectSettings.Layers.Player))
+        if (_currentActionMode != ActionMode.Listening)
         {
-            // if the game object is the same player as our current target, mark the time if left our vision
-            if (obj == _currentTarget.gameObject)
+            GameObject obj = otherObj.gameObject;
+
+            if (obj.IsOnSameLayer(ProjectSettings.Layers.Player))
             {
-                _timeTargetLeftVision = Time.time;
+                // if the game object is the same player as our current target, mark the time if left our vision
+                if (obj == _currentTarget.gameObject)
+                {
+                    _timeTargetLeftVision = Time.time;
+                }
             }
         }
     }
@@ -507,7 +579,7 @@ public class AIInputController : InputControllerBase
         {
             if (_currentMovementMode == MovementMode.Normal)
             {
-                if (!IsLookingAtPatrolPoint(currentPoint))
+                if (!IsLookingAtPoint(currentPoint))
                 {
                     MotorComponent.RotateTowards(currentPoint, Settings.MovementSettings.Rotation);
                 }
@@ -556,7 +628,7 @@ public class AIInputController : InputControllerBase
         {
             if (CanMove(Settings.MovementSettings.Forward))
             {
-                if (!IsLookingAtPatrolPoint(_currentTarget))
+                if (!IsLookingAtPoint(_currentTarget))
                 {
                     MotorComponent.RotateTowards(_currentTarget, Settings.MovementSettings.Rotation);
                 }
@@ -621,6 +693,22 @@ public class AIInputController : InputControllerBase
         }
     }
 
+    private void ListeningUpdate()
+    {
+        // if we're not looking at the listening target, rotate towards it
+        if (!IsLookingAtPoint(_visionSettings.Target))
+        {
+            MotorComponent.RotateTowards(_visionSettings.Target, Settings.MovementSettings.Rotation);
+        }
+        // otherwise, check to see if we've finished looking
+        else if (_visionSettings.HasFinishedListening())
+        {
+            _visionSettings.Reset();
+            _currentTarget = null;
+            GoToMode(ActionMode.Patrol);
+        }
+    }
+
     private void DoPathfinding()
     {
         MotorComponent.Rotate(-1 * Settings.MovementSettings.Rotation);
@@ -668,8 +756,14 @@ public class AIInputController : InputControllerBase
         _currentActionMode = newMode;
     }
 
-    private bool IsLookingAtPatrolPoint(Transform pointToCheck)
+    private bool IsLookingAtPoint(Transform pointToCheck)
     {
+        // sanity check to avoid console errors
+        if (pointToCheck == null)
+        {
+            return false;
+        }
+
         Quaternion directions = Quaternion.LookRotation(pointToCheck.position - MyTransform.position);
 
         return directions == MyTransform.rotation;
@@ -694,6 +788,12 @@ public class AIInputController : InputControllerBase
 
     private bool IsTargetWithinView(Transform target)
     {
+        // sanity check to avoid console errors
+        if (target == null)
+        {
+            return false;
+        }
+
         Vector3 targetPosition = target.position;
         Vector3 vectorToTarget = targetPosition - MyTransform.position;
 
