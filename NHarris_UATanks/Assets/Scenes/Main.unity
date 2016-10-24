@@ -262,6 +262,11 @@ Prefab:
       propertyPath: _isPlayer
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 114000010102892008, guid: b9a918b8107bf34448e4d95cc3024dbe,
+        type: 2}
+      propertyPath: _maxHealth
+      value: 100
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: b9a918b8107bf34448e4d95cc3024dbe, type: 2}
   m_IsPrefabParent: 0
@@ -568,6 +573,16 @@ Prefab:
     - target: {fileID: 114000011632668472, guid: 272370901210b21428b21561f4809898,
         type: 2}
       propertyPath: _movementSettings._forward
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 114000012279025492, guid: 272370901210b21428b21561f4809898,
+        type: 2}
+      propertyPath: _visionSettings._hearingDistance
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 114000012279025492, guid: 272370901210b21428b21561f4809898,
+        type: 2}
+      propertyPath: _maxTimeToChase
       value: 1.5
       objectReference: {fileID: 0}
     m_RemovedComponents: []

@@ -38,7 +38,7 @@ public class AIPatrolManager
     // Which direction in the list is it navigating through
     private enum PatrolDirection { Forward, Backwards }
 
-    public int NumberOfPatrolPoints { get { return _patrolPoints.Count; } }
+    public int NumberOfPatrolPoints { get { return _patrolPoints.Where(x => x != null).ToList().Count; } }
     /// <summary>
     /// Returns the PatrolPointThreshold as a magnitude (squared) value.
     /// </summary>
@@ -66,6 +66,11 @@ public class AIPatrolManager
     [SerializeField]
     [Tooltip("The places the tank will patrol between when in patrol mode.")]
     private List<Transform> _patrolPoints;
+
+    public void Reset()
+    {
+        _timeReachedPatrolPoint = 0;
+    }
 
     public void PatrolPointUpdate()
     {
@@ -261,11 +266,15 @@ public class AIInputController : InputControllerBase
     private enum MovementMode { Normal, Pathfinding }
 
     private float _pathfindingExitTime;
+    private float _timeTargetLeftVision;
 
     [Header("AI Settings")]
     #region serialized fields
     [SerializeField]
     private float _maxTimeDoingPathfinding = 3f;
+    [SerializeField]
+    [Tooltip("The max time the tank will continue to chase the target once it has gone out of range before going back to its normal state.")]
+    private float _maxTimeToChase = 3f;
 
     [ReadOnly]
     [SerializeField]
@@ -368,6 +377,20 @@ public class AIInputController : InputControllerBase
             {
                 _currentTarget = possibleTarget;
                 GoToMode(ActionMode.Chase);
+            }
+        }
+    }
+
+    protected virtual void OnTriggerExit(Collider otherObj)
+    {
+        GameObject obj = otherObj.gameObject;
+
+        if (obj.IsOnSameLayer(ProjectSettings.Layers.Player))
+        {
+            // if the game object is the same player as our current target, mark the time if left our vision
+            if (obj == _currentTarget.gameObject)
+            {
+                _timeTargetLeftVision = Time.time;
             }
         }
     }
@@ -482,6 +505,19 @@ public class AIInputController : InputControllerBase
             return;
         }
 
+        // aggressive tanks don't stop following
+        if (_personality != Personality.Aggressive)
+        {
+            // if the target hasn't left our vision and
+            // if the target has been out of range for too long, drop the current target
+            if (_timeTargetLeftVision != 0 &&
+                Time.time - _timeTargetLeftVision >= _maxTimeToChase)
+            {
+                _currentTarget = null;
+                return;
+            }
+        }
+
         if (_currentMovementMode == MovementMode.Normal)
         {
             if (CanMove(Settings.MovementSettings.Forward))
@@ -581,6 +617,11 @@ public class AIInputController : InputControllerBase
                 break;
 
             case ActionMode.Patrol:
+                _patrolSettings.Reset();
+                break;
+
+            case ActionMode.Chase:
+                _timeTargetLeftVision = 0;
                 break;
 
             default:
