@@ -14,22 +14,25 @@ public enum PatrolStyle { Loop, Sequence, NoRepeat }
 [Serializable]
 public class AggressivePersonalitySettings
 {
-    [SerializeField]
-    [Tooltip("Adds the speed increase value to the tank's speed.")]
-    private bool _increaseSpeed;
-    [SerializeField]
-    [Tooltip("Adds the health increase value to the tank's max health and current health.")]
-    private bool _increaseHealth;
-    [SerializeField]
-    [Tooltip("Adds the fire rate increase value to the tank's shooting delay (in seconds).")]
-    private bool _increaseFireRate;
+    // Cutting these features for now. If I have time later, I'll implement them
 
-    [SerializeField]
-    private float _speedIncreaseValue;
-    [SerializeField]
-    private float _healthIncreaseValue;
-    [SerializeField]
-    private float _fireRateIncrease;
+
+    //[SerializeField]
+    //[Tooltip("Adds the speed increase value to the tank's speed.")]
+    //private bool _increaseSpeed;
+    //[SerializeField]
+    //[Tooltip("Adds the health increase value to the tank's max health and current health.")]
+    //private bool _increaseHealth;
+    //[SerializeField]
+    //[Tooltip("Adds the fire rate increase value to the tank's shooting delay (in seconds).")]
+    //private bool _increaseFireRate;
+
+    //[SerializeField]
+    //private float _speedIncreaseValue;
+    //[SerializeField]
+    //private float _healthIncreaseValue;
+    //[SerializeField]
+    //private float _fireRateIncrease;
 }
 
 [Serializable]
@@ -275,6 +278,9 @@ public class AIInputController : InputControllerBase
     [SerializeField]
     [Tooltip("The max time the tank will continue to chase the target once it has gone out of range before going back to its normal state.")]
     private float _maxTimeToChase = 3f;
+    [SerializeField]
+    [Tooltip("The minimum distance the tank must remain from a player while chasing.")]
+    private float _minDistanceFromTarget = 3f;
 
     [ReadOnly]
     [SerializeField]
@@ -294,8 +300,8 @@ public class AIInputController : InputControllerBase
     [SerializeField]
     private OpacityPhaserSettings _shiftPhasingSettings;
 
-    [SerializeField]
-    private AggressivePersonalitySettings _agressiveSettings;
+    //[SerializeField]
+    //private AggressivePersonalitySettings _agressiveSettings;
     [SerializeField]
     private AIFleeManager _fleeSettings;
     [SerializeField]
@@ -306,6 +312,9 @@ public class AIInputController : InputControllerBase
     [SerializeField]
     [Tooltip("The trigger sphere collider used for hearing detection and FOV distance.")]
     private SphereCollider _triggerSphereCollider;
+    [SerializeField]
+    [Tooltip("The color to apply to the mesh for stationary tanks.")]
+    private Color _stationaryTankColor;
     #endregion
 
     #region Unity Methods
@@ -433,9 +442,34 @@ public class AIInputController : InputControllerBase
 
             // if the tank is a french tank, update its scale for visual feedback
             case Personality.FrenchTank:
-                Vector3 newScale = MyTransform.localScale * .5f;
-                newScale.y = 1;
-                MyTransform.localScale = newScale;
+                {
+                    Vector3 newScale = MyTransform.localScale * .5f;
+                    newScale.y = 1;
+                    MyTransform.localScale = newScale;
+                }
+                break;
+
+            // if the tank is aggressive, update its scale for visual feedback
+            case Personality.Aggressive:
+                {
+                    Vector3 newScale = MyTransform.localScale * 1.5f;
+                    newScale.y = 1;
+                    MyTransform.localScale = newScale;
+                }
+                break;
+
+            // if the tank is stationary, update all of its materials colors to the designer specified color
+            case Personality.Stationary:
+                GetComponentsInChildren<MeshRenderer>()
+                    .Select(x => x.materials.ToList())
+                    .ToList()
+                    .ForEach((list) =>
+                    {
+                        list.ForEach((material) =>
+                        {
+                            material.color = _stationaryTankColor;
+                        });
+                    });
                 break;
 
             default:
@@ -527,7 +561,10 @@ public class AIInputController : InputControllerBase
                     MotorComponent.RotateTowards(_currentTarget, Settings.MovementSettings.Rotation);
                 }
 
-                if (GetDistanceFromObject(_currentTarget) >= _patrolSettings.PatrolPointThreshold)
+                // If the personality isn't stationary and the target isn't within our minimum distance,
+                // move towards them 
+                if (_personality != Personality.Stationary &&
+                    GetDistanceFromObject(_currentTarget) >= _minDistanceFromTarget)
                 {
                     MotorComponent.Move(Settings.MovementSettings.Forward);
                 }
