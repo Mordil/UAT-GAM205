@@ -30,6 +30,10 @@ public class ReadOnlyDrawer : PropertyDrawer
                 value = property.enumNames[property.enumValueIndex];
                 break;
 
+            case SerializedPropertyType.ObjectReference:
+                value = (property.objectReferenceValue == null) ? "(Not Set)" : property.objectReferenceValue.name;
+                break;
+
             default:
                 value = "(not supported)";
                 break;

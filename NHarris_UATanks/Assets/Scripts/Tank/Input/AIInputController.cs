@@ -4,36 +4,12 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public enum Personality
-{
-    /// <summary>
-    /// Chases the player until killed.
-    /// </summary>
-    Aggressive,
-    /// <summary>
-    /// Spawns additional tanks when first spotting the player.
-    /// </summary>
-    //GuardCaptain,
-    /// <summary>
-    /// Patrols and chases the player if seen for a short duration.
-    /// </summary>
-    Standard,
-    /// <summary>
-    /// Patrol tank that phases between visible and invisible.
-    /// </summary>
-    PhaseShift,
-    /// <summary>
-    /// Flees the fight if too much health is lost.
-    /// </summary>
-    FrenchTank
-}
-
 public enum ActionMode { Chase, Flee, Patrol }
 
 /// <summary>
 /// Represents the style of patrol movement the tank follows.
 /// </summary>
-public enum PatrolMode { Loop, Sequence, NoRepeat }
+public enum PatrolStyle { Loop, Sequence, NoRepeat }
 
 [Serializable]
 public class AggressivePersonalitySettings
@@ -56,178 +32,282 @@ public class AggressivePersonalitySettings
     private float _fireRateIncrease;
 }
 
-// This feature is being tabled for now due to time constraints. If I have extra time in later weeks, I'll re-add this.
-//[Serializable]
-//public class GuardCaptainPersonalitySettings
-//{
-//    [SerializeField]
-//    private int _numberOfTanksToSpawn = 5;
-
-//    [SerializeField]
-//    private List<GameObject> _tanksToSpawnPrefabs;
-//}
-
 [Serializable]
-public class AITankSettings
+public class AIPatrolManager
 {
-    public int FleeHealthThreshold { get { return _fleeHealthThreshold; } }
-    public float PatrolPointThreshold { get { return _patrolPointThreshold; } }
+    // Which direction in the list is it navigating through
+    private enum PatrolDirection { Forward, Backwards }
+
+    public int NumberOfPatrolPoints { get { return _patrolPoints.Count; } }
     /// <summary>
-    /// PatrolPointThreshold squared.
+    /// Returns the PatrolPointThreshold as a magnitude (squared) value.
     /// </summary>
-    public float PatrolPointThresholdMagnitude { get { return _patrolPointThreshold * _patrolPointThreshold; } }
-    public float DelayBetweenPatrolPoints { get { return _delayBetweenPatrolPoints; } }
-    public float FleeDistance
-    {
-        get
-        {
-            // French Tanks flee twice as far as normal tanks.
-            if (SelectedPersonality == Personality.FrenchTank)
-            {
-                return _fleeDistance * 2;
-            }
-            return _fleeDistance;
-        }
-    }
-    public float FleeTime
-    {
-        get
-        {
-            // French Tanks flee for twice as long as normal tanks.
-            if (SelectedPersonality == Personality.FrenchTank)
-            {
-                return _fleeTime * 2;
-            }
-            return _fleeTime;
-        }
-    }
-    public float MaxTimeDoingPathfinding { get { return _maxTimeDoingPathfinding; } }
-    public float DistanceToShoot { get { return _distanceToShoot; } }
-    public float LineOfSightAngle { get { return _lineOfSightAngle; } }
+    public float PatrolPointThreshold { get { return _patrolPointThreshold * _patrolPointThreshold; } }
 
-    public Personality SelectedPersonality { get { return _personality; } }
-    public PatrolMode SelectedPatrolMode { get { return _patrolMode; } }
-    public OpacityPhaserSettings ShiftPhasingSettings { get { return _shiftPhasingSettings; } }
-
+    public Transform CurrentPatrolPoint { get { return _patrolPoints[_currentPatrolPointIndex]; } }
+    
+    [ReadOnly]
     [SerializeField]
-    [Tooltip("The health at which the tank will start fleeing.")]
-    private int _fleeHealthThreshold = 10;
+    private int _currentPatrolPointIndex;
+    private float _timeReachedPatrolPoint;
     [SerializeField]
     [Tooltip("The distance (in meters) the tank needs to reach towards a patrol point before selecting the next one.")]
     private float _patrolPointThreshold = 10f;
     [SerializeField]
-    [Tooltip("The units the tank can hear the player (in meters).")]
-    private float _hearingDistance = 20f;
-    [SerializeField]
-    [Tooltip("The angle (in degrees) the tank can see, with the halfway point being forward.")]
-    private float _lineOfSightAngle = 120f;
-    [SerializeField]
-    [Tooltip("The distance a player must be within to be shot at.")]
-    private float _distanceToShoot = 20f;
-    [SerializeField]
     [Tooltip("The time (in seconds) the tank will wait before selecting and patrolling to the next patrol point.")]
     private float _delayBetweenPatrolPoints = 0f;
+
+    [SerializeField]
+    private PatrolStyle _patrolStyle = PatrolStyle.Loop;
+    [ReadOnly]
+    [SerializeField]
+    private PatrolDirection _patrolDirection = PatrolDirection.Forward;
+
+    [SerializeField]
+    [Tooltip("The places the tank will patrol between when in patrol mode.")]
+    private List<Transform> _patrolPoints;
+
+    public void PatrolPointUpdate()
+    {
+        // if we haven't set it yet, do so now for PatrolPointUpdate() delay logic
+        if (_timeReachedPatrolPoint == 0)
+        {
+            _timeReachedPatrolPoint = Time.time;
+        }
+
+        // if enough time has passed after reaching the patrol point, update to the next
+        if (Time.time - _timeReachedPatrolPoint >= _delayBetweenPatrolPoints)
+        {
+            // reset the variable for later
+            _timeReachedPatrolPoint = 0;
+
+            SwitchPatrolPoints();
+        }
+    }
+
+    private void SwitchPatrolPoints()
+    {
+        switch (_patrolStyle)
+        {
+            case PatrolStyle.Sequence:
+                // if the tank is navigating forward through the list 0...10
+                if (_patrolDirection == PatrolDirection.Forward)
+                {
+                    // check if the index is not the last, if true just increment
+                    if (_currentPatrolPointIndex < _patrolPoints.Count - 1)
+                    {
+                        _currentPatrolPointIndex++;
+                    }
+                    else
+                    {
+                        // otherwise change the direction for the next loop
+                        _patrolDirection = PatrolDirection.Backwards;
+                    }
+                }
+                else
+                {
+                    // check to see if the index is not the first, if true just decrement
+                    if (_currentPatrolPointIndex > 0)
+                    {
+                        _currentPatrolPointIndex--;
+                    }
+                    else
+                    {
+                        // otherwise change direction for the next loop
+                        _patrolDirection = PatrolDirection.Forward;
+                    }
+                }
+                break;
+
+            case PatrolStyle.NoRepeat:
+                // if the current index is the last one, just return - there are no updates to do
+                if (_currentPatrolPointIndex == _patrolPoints.Count - 1)
+                {
+                    return;
+                }
+                // otherwise, increment the index
+                else
+                {
+                    _currentPatrolPointIndex++;
+                }
+                break;
+
+            case PatrolStyle.Loop:
+            default:
+                // if the current index is the last
+                if (_currentPatrolPointIndex == _patrolPoints.Count - 1)
+                {
+                    // reset the index to the first
+                    _currentPatrolPointIndex = 0;
+                }
+                else
+                {
+                    // otherwise just increment
+                    _currentPatrolPointIndex++;
+                }
+                break;
+        }
+    }
+}
+
+[Serializable]
+public class AIFleeManager
+{
+    public int HealthThresholdToFlee { get { return _healthThresholdToFlee; } }
+
+    public Transform Target { get { return _fleeTarget; } }
+
+    [SerializeField]
+    [Tooltip("The health at which the tank will start fleeing.")]
+    private int _healthThresholdToFlee = 10;
     [SerializeField]
     [Tooltip("The distance (in meters) the tank will run away from the target when below certain health threshold.")]
     private float _fleeDistance = 10f;
     [SerializeField]
     [Tooltip("The time (in seconds) the tank will wait at the flee position after reaching it before going back to patrol mode.")]
     private float _fleeTime = 10f;
+    private float _timeReachedTarget;
+
+    [ReadOnly]
     [SerializeField]
-    private float _maxTimeDoingPathfinding = 3f;
+    private Transform _fleeTarget;
+
+    public void Setup(Vector3 targetToFleePosition, Vector3 currentPosition, AIInputController.Personality selectedPersonality)
+    {
+        // get the position of the "invisible target" for fleeing by inverting the vector from the target
+        Vector3 vectorAwayFromTarget = (targetToFleePosition - currentPosition) * -1;
+        // normalize the fector to work with
+        vectorAwayFromTarget.Normalize();
+        // increase the mangitude by the setting
+        // french tanks go twice as far
+        vectorAwayFromTarget *= (selectedPersonality == AIInputController.Personality.FrenchTank) ? _fleeDistance * 2 : _fleeDistance;
+
+        // Add the current position and the calculated vector distance away to get the final world space position
+        // and set it to the new gameobject's position
+        _fleeTarget = new GameObject(GetHashCode() + "_FleeTarget").transform;
+        _fleeTarget.position = vectorAwayFromTarget + currentPosition;
+    }
+
+    public void Reset()
+    {
+        // reset the time for us in HasFinishedFleeing()
+        _timeReachedTarget = 0;
+    }
+
+    public bool HasFinishedFleeing()
+    {
+        // if the target has just been reached, assign the current time and return false as this is just being set
+        if (_timeReachedTarget == 0)
+        {
+            _timeReachedTarget = Time.time;
+            return false;
+        }
+
+        // if enough time has passed, destroy the object and return true as there is no more fleeing to do
+        if (Time.time - _timeReachedTarget >= _fleeTime)
+        {
+            UnityEngine.Object.Destroy(_fleeTarget.gameObject);
+            return true;
+        }
+
+        // otherwise, return false
+        return false;
+    }
+}
+
+[Serializable]
+public class AIVisionSettings
+{
+    public float HearingDistance { get { return _hearingDistance; } }
+    public float LineOfSightAngle { get { return _lineOfSightAngle; } }
 
     [SerializeField]
-    private AggressivePersonalitySettings _agressiveSettings;
-    //[SerializeField]
-    //private GuardCaptainPersonalitySettings _guardCaptainSettings;
+    [Tooltip("The distance (in meters) the tank can hear the player. This also determines how far the tank can see.")]
+    private float _hearingDistance = 20f;
     [SerializeField]
-    private OpacityPhaserSettings _shiftPhasingSettings;
-    [SerializeField]
-    private Personality _personality = Personality.Standard;
-    [SerializeField]
-    private PatrolMode _patrolMode = PatrolMode.Loop;
-
-    [SerializeField]
-    [Tooltip("The places the tank will patrol between when in patrol mode.")]
-    private List<Transform> _patrolPoints;
-    public List<Transform> PatrolPoints { get { return _patrolPoints; } }
+    [Tooltip("The angle (in degrees) the tank can see, with the halfway point being forward.")]
+    private float _lineOfSightAngle = 120f;
 }
 
 [HelpURL("Assets/Scripts/Tank/README.md")]
 [RequireComponent(typeof(TankController))]
 public class AIInputController : InputControllerBase
 {
-    // Which direction in the list is it navigating through
-    private enum PatrolDirection { Forward, Backwards }
+    public enum Personality
+    {
+        /// <summary>
+        /// Chases the player until killed.
+        /// </summary>
+        Aggressive,
+        /// <summary>
+        /// Patrols and chases the player if seen for a short duration.
+        /// </summary>
+        Standard,
+        /// <summary>
+        /// Tank does not patrol.
+        /// </summary>
+        Stationary,
+        /// <summary>
+        /// Patrol tank that phases between visible and invisible.
+        /// </summary>
+        PhaseShift,
+        /// <summary>
+        /// Flees the fight if too much health is lost.
+        /// </summary>
+        FrenchTank
+    }
+
     // Which stage of movement is happening
     private enum MovementMode { Normal, Pathfinding }
 
-    public bool HasSeenPlayer
-    {
-        get { return _hasSeenPlayer; }
-        private set
-        {
-            _hasSeenPlayer = value;
-
-            if (!_hasSeenPlayerAlready)
-            {
-                _hasSeenPlayerAlready = true;
-            }
-        }
-    }
-
-    public ActionMode CurrentActionMode { get { return _currentActionMode; } }
-
-    private bool _hasSeenPlayerAlready;
-    private bool _hasSeenPlayer;
-    private bool _didSetTimeReachedPatrolPoint;
-
-    private int _currentPatrolPointIndex;
-    private float _timeReachedPatrolPoint;
     private float _pathfindingExitTime;
-    
+
+    [Header("AI Settings")]
+    #region serialized fields
+    [SerializeField]
+    private float _maxTimeDoingPathfinding = 3f;
+
+    [ReadOnly]
     [SerializeField]
     private ActionMode _currentActionMode = ActionMode.Patrol;
-    private PatrolDirection _patrolDirection = PatrolDirection.Forward;
+    [ReadOnly]
     [SerializeField]
     private MovementMode _currentMovementMode = MovementMode.Normal;
     [SerializeField]
-    private AITankSettings _aiSettings;
+    private Personality _personality = Personality.Standard;
+
+    [ReadOnly]
     [SerializeField]
     private Transform _currentTarget;
-    private Transform _fleeTarget;
+
     [SerializeField]
     private TankController _controller;
     [SerializeField]
+    private OpacityPhaserSettings _shiftPhasingSettings;
+
+    [SerializeField]
+    private AggressivePersonalitySettings _agressiveSettings;
+    [SerializeField]
+    private AIFleeManager _fleeSettings;
+    [SerializeField]
+    private AIPatrolManager _patrolSettings;
+    [SerializeField]
+    private AIVisionSettings _visionSettings;
+
+    [SerializeField]
     [Tooltip("The trigger sphere collider used for hearing detection and FOV distance.")]
     private SphereCollider _triggerSphereCollider;
+    #endregion
 
-    #region Unity
+    #region Unity Methods
     protected override void Awake()
     {
         // because a tank can be instantiated at runtime, start won't be called, so we do it ourselves
         base.Start();
 
-        // if the AI is meant to do phase shifting, check to see if it has the proper component
-        if (_aiSettings.SelectedPersonality == Personality.PhaseShift)
-        {
-            // if not, add it and initialize its settings
-            if (GetComponent<OpacityPhaser>() == null)
-            {
-                this.gameObject.AddComponent<OpacityPhaser>();
-                GetComponent<OpacityPhaser>().Initialize(_aiSettings.ShiftPhasingSettings);
-            }
-        }
+        DoPersonalitySetup();
 
-        if (_aiSettings.SelectedPersonality == Personality.FrenchTank)
-        {
-            // 
-            Vector3 newScale = MyTransform.localScale * .5f;
-            newScale.y = 1;
-            MyTransform.localScale = newScale;
-        }
-
-        // if the trigger isn't selected, find the first component that is a trigger
+        // if the hearing/vision trigger isn't selected, find the first collider component that is a trigger
         if (_triggerSphereCollider == null)
         {
             _triggerSphereCollider = GetComponents<SphereCollider>()
@@ -235,25 +315,22 @@ public class AIInputController : InputControllerBase
                 .First();
         }
 
-        _triggerSphereCollider.radius = _aiSettings.DistanceToShoot;
+        // make sure the trigger's radius is the proper size
+        _triggerSphereCollider.radius = _visionSettings.HearingDistance;
     }
 
     protected override void Update()
     {
-        if (_aiSettings.SelectedPersonality != Personality.Aggressive)
+        // aggressive tanks don't flee
+        if (_personality != Personality.Aggressive)
         {
-            HealthUpdate();
+            CheckIfShouldFlee();
         }
 
+        // do the current action mode's update cycle
         switch (_currentActionMode)
         {
             case ActionMode.Chase:
-                if (_currentTarget == null)
-                {
-                    _currentActionMode = ActionMode.Patrol;
-                    return;
-                }
-
                 ChaseTargetUpdate();
                 break;
 
@@ -263,7 +340,8 @@ public class AIInputController : InputControllerBase
 
             case ActionMode.Patrol:
             default:
-                if (_aiSettings.PatrolPoints.Count > 0)
+                // stationary targets don't patrol
+                if (_personality != Personality.Stationary)
                 {
                     PatrolUpdate();
                 }
@@ -271,12 +349,12 @@ public class AIInputController : InputControllerBase
         }
     }
 
-    protected void OnDestroy()
+    protected virtual void OnDestroy()
     {
-        // if this hasn't been destroyed through normal gameplay, clean up
-        if (_fleeTarget != null)
+        // if this hasn't been destroyed through normal gameplay, manually clean it up
+        if (_fleeSettings.Target != null)
         {
-            Destroy(_fleeTarget.gameObject);
+            Destroy(_fleeSettings.Target.gameObject);
         }
     }
 
@@ -289,18 +367,20 @@ public class AIInputController : InputControllerBase
             if (IsTargetWithinView(possibleTarget))
             {
                 _currentTarget = possibleTarget;
-                _currentActionMode = ActionMode.Chase;
+                GoToMode(ActionMode.Chase);
             }
         }
     }
     #endregion
 
+    #region Parent methods
     protected override void CheckDependencies()
     {
         base.CheckDependencies();
 
         this.CheckAndAssignIfDependencyIsNull(ref _controller);
     }
+    #endregion
 
     // Handler method for the TankController message broadcast when hit by a bullet
     public void OnTookDamage(TankController shooter)
@@ -314,43 +394,56 @@ public class AIInputController : InputControllerBase
         }
     }
 
-    private void HealthUpdate()
+    private void DoPersonalitySetup()
     {
-        if (_currentActionMode != ActionMode.Flee &&
-            _controller.CurrentHealth <= _aiSettings.FleeHealthThreshold)
+        switch (_personality)
         {
-            // assign the new state
-            _currentActionMode = ActionMode.Flee;
+            // if the AI is meant to do phase shifting, check to see if it has the proper component
+            case Personality.PhaseShift:
+                // if not, add it and initialize its settings
+                if (GetComponent<OpacityPhaser>() == null)
+                {
+                    this.gameObject.AddComponent<OpacityPhaser>();
+                    GetComponent<OpacityPhaser>().Initialize(_shiftPhasingSettings);
+                }
+                break;
 
-            // reset variables needed for the flee state
-            _didSetTimeReachedPatrolPoint = false;
-            _timeReachedPatrolPoint = 0;
+            // if the tank is a french tank, update its scale for visual feedback
+            case Personality.FrenchTank:
+                Vector3 newScale = MyTransform.localScale * .5f;
+                newScale.y = 1;
+                MyTransform.localScale = newScale;
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    private void CheckIfShouldFlee()
+    {
+        // if we're not already fleeing and our health is low enough, go to flee mode
+        if (_currentActionMode != ActionMode.Flee &&
+            _controller.CurrentHealth <= _fleeSettings.HealthThresholdToFlee)
+        {
+            GoToMode(ActionMode.Flee);
         }
     }
 
     private void PatrolUpdate()
     {
-        Transform currentPoint = _aiSettings.PatrolPoints[_currentPatrolPointIndex];
+        // If there are no patrol points, there's nothing to do this update cycle
+        if (_patrolSettings.NumberOfPatrolPoints == 0)
+        {
+            return;
+        }
+
+        Transform currentPoint = _patrolSettings.CurrentPatrolPoint;
 
         // if the tank is within range of the target, switch to the next
-        if (GetDistanceFromObject(currentPoint) <= _aiSettings.PatrolPointThresholdMagnitude)
+        if (GetDistanceFromObject(currentPoint) <= _patrolSettings.PatrolPointThreshold)
         {
-            // if we haven't set it yet, do so now for PatrolPointUpdate() delay logic
-            if (!_didSetTimeReachedPatrolPoint)
-            {
-                _didSetTimeReachedPatrolPoint = true;
-                _timeReachedPatrolPoint = Time.time;
-            }
-
-            // if enough time has passed after reaching the patrol point, update to the next
-            if (Time.time - _timeReachedPatrolPoint >= _aiSettings.DelayBetweenPatrolPoints)
-            {
-                // reset the variables as we're about to change patrol points
-                _didSetTimeReachedPatrolPoint = false;
-                _timeReachedPatrolPoint = 0;
-
-                PatrolPointUpdate(currentPoint);
-            }
+            _patrolSettings.PatrolPointUpdate();
         }
         // otherwise we need to rotate/move towards the target
         else
@@ -380,72 +473,15 @@ public class AIInputController : InputControllerBase
         }
     }
 
-    private void PatrolPointUpdate(Transform currentPoint)
-    {
-        switch (_aiSettings.SelectedPatrolMode)
-        {
-            case PatrolMode.Sequence:
-                // if the tank is navigating forward through the list 0...10
-                if (_patrolDirection == PatrolDirection.Forward)
-                {
-                    // check if the index is not the last, if true just increment
-                    if (_currentPatrolPointIndex < _aiSettings.PatrolPoints.Count - 1)
-                    {
-                        _currentPatrolPointIndex++;
-                    }
-                    else
-                    {
-                        // otherwise change the direction for the next loop
-                        _patrolDirection = PatrolDirection.Backwards;
-                    }
-                }
-                else
-                {
-                    // check to see if the index is not the first, if true just decrement
-                    if (_currentPatrolPointIndex > 0)
-                    {
-                        _currentPatrolPointIndex--;
-                    }
-                    else
-                    {
-                        // otherwise change direction for the next loop
-                        _patrolDirection = PatrolDirection.Forward;
-                    }
-                }
-                break;
-
-            case PatrolMode.NoRepeat:
-                // if the current index is the last one, just return - there are no updates to do
-                if (_currentPatrolPointIndex == _aiSettings.PatrolPoints.Count - 1)
-                {
-                    return;
-                }
-                // otherwise, increment the index
-                else
-                {
-                    _currentPatrolPointIndex++;
-                }
-                break;
-
-            case PatrolMode.Loop:
-            default:
-                // if the current index is the last
-                if (_currentPatrolPointIndex == _aiSettings.PatrolPoints.Count - 1)
-                {
-                    // reset the index to the first
-                    _currentPatrolPointIndex = 0;
-                }
-                else
-                {
-                    // otherwise just increment
-                    _currentPatrolPointIndex++;
-                }
-                break;
-        }
-    }
-
     private void ChaseTargetUpdate()
     {
+        // if the target has become null, then return to normal patrol mode and end update
+        if (_currentTarget == null)
+        {
+            GoToMode(ActionMode.Patrol);
+            return;
+        }
+
         if (_currentMovementMode == MovementMode.Normal)
         {
             if (CanMove(Settings.MovementSettings.Forward))
@@ -455,7 +491,7 @@ public class AIInputController : InputControllerBase
                     MotorComponent.RotateTowards(_currentTarget, Settings.MovementSettings.Rotation);
                 }
 
-                if (GetDistanceFromObject(_currentTarget) >= _aiSettings.PatrolPointThresholdMagnitude)
+                if (GetDistanceFromObject(_currentTarget) >= _patrolSettings.PatrolPointThreshold)
                 {
                     MotorComponent.Move(Settings.MovementSettings.Forward);
                 }
@@ -478,47 +514,17 @@ public class AIInputController : InputControllerBase
 
     private void FleeTargetUpdate()
     {
-        // if the target hasn't been set and we're not keeping track of time that means we just hit the Flee mode
-        if (_fleeTarget == null && _timeReachedPatrolPoint == 0)
-        {
-            // get the position of the "invisible target" for fleeing by inverting the vector from the target
-            Vector3 vectorAwayFromTarget = (_currentTarget.position - MyTransform.position) * -1;
-            // normalize the fector to work with
-            vectorAwayFromTarget.Normalize();
-            vectorAwayFromTarget *= _aiSettings.FleeDistance;
-
-            // Add the current position and the calculated vector distance away to get the final world space position
-            // and set it to the new gameobject's position
-            _fleeTarget = new GameObject(this.gameObject.name + "_FleeTarget").transform;
-            _fleeTarget.position = vectorAwayFromTarget + MyTransform.position;
-        }
-
         // if the tank has reached its flee point
-        if (GetDistanceFromObject(_fleeTarget) <= _aiSettings.PatrolPointThresholdMagnitude)
+        if (GetDistanceFromObject(_fleeSettings.Target) <= _patrolSettings.PatrolPointThreshold)
         {
-            // we're reusing this variable
-            // TODO: review if this should be changed later to avoid bugs...
-            if (_timeReachedPatrolPoint == 0)
+            // if enough time has passed, go back to patrolling
+            if (_fleeSettings.HasFinishedFleeing())
             {
-                _timeReachedPatrolPoint = Time.time;
+                GoToMode(ActionMode.Patrol);
             }
-            else
+            else // regain health
             {
-                // if enough time has passed, go back to patrolling
-                if (Time.time - _timeReachedPatrolPoint >= _aiSettings.FleeTime)
-                {
-                    // destroy the gameobject
-                    Destroy(_fleeTarget.gameObject);
-
-                    _currentActionMode = ActionMode.Patrol;
-
-                    // reset this variable
-                    _timeReachedPatrolPoint = 0;
-                }
-                else // regain health
-                {
-                    _controller.RegenerateHealth();
-                }
+                _controller.RegenerateHealth();
             }
         }
         else // we need to move towards the flee target still
@@ -527,7 +533,7 @@ public class AIInputController : InputControllerBase
             {
                 if (CanMove(Settings.MovementSettings.Forward))
                 {
-                    MotorComponent.RotateTowards(_fleeTarget, Settings.MovementSettings.Rotation);
+                    MotorComponent.RotateTowards(_fleeSettings.Target, Settings.MovementSettings.Rotation);
                     MotorComponent.Move(Settings.MovementSettings.Forward);
                 }
                 else
@@ -550,7 +556,7 @@ public class AIInputController : InputControllerBase
         {
             if (_pathfindingExitTime == 0)
             {
-                _pathfindingExitTime = _aiSettings.MaxTimeDoingPathfinding;
+                _pathfindingExitTime = _maxTimeDoingPathfinding;
             }
 
             MotorComponent.Move(Settings.MovementSettings.Forward);
@@ -562,6 +568,26 @@ public class AIInputController : InputControllerBase
                 _currentMovementMode = MovementMode.Normal;
             }
         }
+    }
+
+    private void GoToMode(ActionMode newMode)
+    {
+        switch (newMode)
+        {
+            case ActionMode.Flee:
+                // Reset the manager and then set it up
+                _fleeSettings.Reset();
+                _fleeSettings.Setup(_currentTarget.position, MyTransform.position, _personality);
+                break;
+
+            case ActionMode.Patrol:
+                break;
+
+            default:
+                break;
+        }
+
+        _currentActionMode = newMode;
     }
 
     private bool IsLookingAtPatrolPoint(Transform pointToCheck)
@@ -582,7 +608,7 @@ public class AIInputController : InputControllerBase
             // return if the object hit was a player, flee target, or projectile (these are non blockers)
             return obj.IsOnSameLayer(ProjectSettings.Layers.Player) ||
                 obj.IsOnSameLayer(ProjectSettings.Layers.Projectiles) ||
-                (_fleeTarget != null && obj == _fleeTarget.gameObject);
+                (_fleeSettings.Target != null && obj == _fleeSettings.Target.gameObject);
         }
         // return true in all other cases
         return true;
@@ -595,7 +621,7 @@ public class AIInputController : InputControllerBase
 
         float angleToTarget = Vector3.Angle(vectorToTarget, MyTransform.forward);
 
-        if (angleToTarget <= _aiSettings.LineOfSightAngle)
+        if (angleToTarget <= _visionSettings.LineOfSightAngle)
         {
             Ray ray = new Ray();
 
@@ -604,7 +630,7 @@ public class AIInputController : InputControllerBase
 
             RaycastHit hit;
 
-            if (Physics.Raycast(ray, out hit, _aiSettings.DistanceToShoot))
+            if (Physics.Raycast(ray, out hit, _visionSettings.HearingDistance))
             {
                 if (hit.collider.gameObject.IsOnSameLayer(ProjectSettings.Layers.Player))
                 {
