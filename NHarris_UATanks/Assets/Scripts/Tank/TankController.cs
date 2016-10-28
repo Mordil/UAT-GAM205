@@ -15,6 +15,8 @@ public class TankController : BaseScript
     public int CurrentHealth { get { return _currentHealth; } }
     public int CurrentScore { get { return _currentScore; } }
 
+    public TankSettings Settings { get { return _settings; } }
+
     [SerializeField]
     private int _currentHealth;
     [SerializeField]
