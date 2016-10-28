@@ -1,32 +1,12 @@
-﻿using L4.Unity.Common;
-using System;
-using UnityEngine;
+﻿using UnityEngine;
 
-[RequireComponent(typeof (TankSettings), typeof(TankMotor), typeof(TankShooter))]
-public class InputController : BaseScript
+public class PlayerInputController : InputControllerBase
 {
-    protected DateTime TimeLastFired;
-    [SerializeField]
-    protected TankSettings Settings;
-    [SerializeField]
-    protected TankMotor MotorComponent;
-    [SerializeField]
-    protected TankShooter ShooterComponent;
-	
 	protected override void Update()
     {
         HandleMovementInput();
         HandleRotationInput();
         HandleShootingInput();
-    }
-
-    protected override void CheckDependencies()
-    {
-        base.CheckDependencies();
-
-        this.CheckAndAssignIfDependencyIsNull(ref Settings);
-        this.CheckAndAssignIfDependencyIsNull(ref MotorComponent);
-        this.CheckAndAssignIfDependencyIsNull(ref ShooterComponent);
     }
 
     // Checks and sends input for positional movement.
@@ -65,18 +45,5 @@ public class InputController : BaseScript
                 Shoot();
             }
         }
-    }
-
-    // Fires a bullet with the ShooterComponent.
-    protected void Shoot()
-    {
-        ShooterComponent.Fire();
-        TimeLastFired = DateTime.Now;
-    }
-
-    // Returns true if the time since last fired is greater than the rate of fire.
-    protected bool CanShoot()
-    {
-        return (DateTime.Now - TimeLastFired).Seconds >= Settings.RateOfFire;
     }
 }

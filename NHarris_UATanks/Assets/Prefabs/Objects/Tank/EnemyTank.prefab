@@ -90,6 +90,7 @@ GameObject:
   - 114: {fileID: 114000012032654912}
   - 114: {fileID: 114000012279025492}
   - 114: {fileID: 114000010808868774}
+  - 135: {fileID: 135000013275635472}
   m_Layer: 10
   m_Name: EnemyTank
   m_TagString: Untagged
@@ -209,10 +210,10 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1000011237834544}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: 0, y: 0.008726558, z: 0, w: 0.999962}
   m_LocalPosition: {x: 0, y: 1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 1, z: 0}
   m_Children:
   - {fileID: 4000012240837664}
   - {fileID: 4000011415003404}
@@ -425,8 +426,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b2101968bd55c348a53943e35805d74, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  CurrentHealth: 0
-  CurrentScore: 0
+  _currentHealth: 0
+  _currentScore: 0
   _settings: {fileID: 0}
 --- !u!114 &114000011632668472
 MonoBehaviour:
@@ -441,8 +442,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _isPlayer: 0
   _maxHealth: 20
+  _healthRegenRate: 2
   _killValue: 5
-  _rateOfFire: 1.5
+  _rateOfFire: 3
   _movementSettings:
     _forward: 3
     _backward: 3
@@ -478,6 +480,51 @@ MonoBehaviour:
   Settings: {fileID: 0}
   MotorComponent: {fileID: 0}
   ShooterComponent: {fileID: 0}
+  MyTransform: {fileID: 0}
+  _maxTimeDoingPathfinding: 3
+  _maxTimeToChase: 3
+  _minDistanceFromTarget: 2
+  _currentActionMode: 2
+  _currentMovementMode: 0
+  _personality: 1
+  _currentTarget: {fileID: 0}
+  _controller: {fileID: 114000010808868774}
+  _shiftPhasingSettings:
+    _pause: 0
+    _minOpacity: 0
+    _maxOpacity: 1
+    _transitionSpeed: 0.45
+  _fleeSettings:
+    _healthThresholdToFlee: 10
+    _fleeDistance: 10
+    _fleeTime: 5
+    _fleeTarget: {fileID: 0}
+  _patrolSettings:
+    _currentPatrolPointIndex: 0
+    _patrolPointThreshold: 2
+    _delayBetweenPatrolPoints: 1.5
+    _patrolStyle: 0
+    _patrolDirection: 0
+    _patrolPoints: []
+  _visionSettings:
+    _hearingDistance: 5
+    _lineOfSightAngle: 45
+    _maxTimeToListen: 5
+    _listenTarget: {fileID: 0}
+  _triggerSphereCollider: {fileID: 135000013275635472}
+  _stationaryTankColor: {r: 1, g: 0.51724136, b: 0, a: 1}
+--- !u!135 &135000013275635472
+SphereCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1000011237834544}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 5
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!135 &135000013449051822
 SphereCollider:
   m_ObjectHideFlags: 1

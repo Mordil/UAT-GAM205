@@ -56,7 +56,7 @@ public class TankBullet : BaseScript
         }
     }
 
-    private void OnTriggerEnter(Collider otherObj)
+    private void OnCollisionEnter(Collision otherObj)
     {
         // if the collision is not with the shooter
         if (Owner != null && Owner.gameObject != otherObj.gameObject)
