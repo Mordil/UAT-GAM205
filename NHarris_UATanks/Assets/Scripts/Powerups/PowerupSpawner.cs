@@ -1,46 +1,11 @@
 ﻿using L4.Unity.Common;
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public interface IPowerup
-{
-    bool IsPermanent { get; }
-    
-    float Duration { get; }
-
-    void OnPickup(TankController controller);
-    void OnExpire(TankController controller);
-}
-
-[Serializable]
-public class Powerup : IPowerup
-{
-    public bool IsPermanent { get { return false; } }
-
-    public float Duration { get { return 0f; } }
-
-    public void OnPickup(TankController controller)
-    {
-
-    }
-
-    public void OnExpire(TankController controller)
-    {
-
-    }
-}
-
+[AddComponentMenu("Powerups/Spawner")]
 public class PowerupSpawner : BaseScript
 {
-    public enum PowerupType
-    {
-        SpeedBoost
-    }
-
     private enum SpawnLogic { SinglePrefab, InSequence, Random }
-
-    public PowerupType Type { get { return _powerupType; } }
 
     [SerializeField]
     [Tooltip("The number of instances this spawner will spawn before stopping. If 0, will spawn infinitely.")]
@@ -54,7 +19,7 @@ public class PowerupSpawner : BaseScript
     [SerializeField]
     [Tooltip("The delay (in seconds) between a powerup being picked up and the next instance being spawned.")]
     private float _spawnDelay = 1.5f;
-    private float _timeLastSpawned = 0;
+    private float _nextSpawnTime = 0;
     [SerializeField]
     [Tooltip("The height above the spawner the spawned powerup should be at.")]
     private float _heightOffset = 1f;
@@ -62,8 +27,6 @@ public class PowerupSpawner : BaseScript
     [SerializeField]
     [Tooltip("How does the spawner handle determining which prefab to use?")]
     private SpawnLogic _spawnLogic;
-    [SerializeField]
-    private PowerupType _powerupType;
 
     [ReadOnly]
     [SerializeField]
@@ -81,6 +44,11 @@ public class PowerupSpawner : BaseScript
 
     protected override void Update()
     {
+        if (_spawnedInstance == null && _nextSpawnTime == 0)
+        {
+            _nextSpawnTime = Time.time + _spawnDelay;
+        }
+
         if (CanSpawn())
         {
             GameObject powerup = GetPowerupToSpawn();
@@ -95,7 +63,7 @@ public class PowerupSpawner : BaseScript
             Quaternion.identity) as GameObject;
         _spawnedInstance.transform.SetParent(_myTransform, true);
         _instancesSpawnedCount++;
-        _timeLastSpawned = Time.time;
+        _nextSpawnTime = 0;
     }
 
     private bool CanSpawn()
@@ -107,7 +75,7 @@ public class PowerupSpawner : BaseScript
         }
 
         bool isSpawnCountLowEnough = (_maxTimesToSpawn != 0) ?_maxTimesToSpawn < _instancesSpawnedCount : true;
-        bool enoughTimeHasPassed = (Time.time - _timeLastSpawned) >= _spawnDelay;
+        bool enoughTimeHasPassed = Time.time >= _nextSpawnTime;
 
         return isSpawnCountLowEnough && enoughTimeHasPassed;
     }

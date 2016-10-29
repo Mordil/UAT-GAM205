@@ -6,6 +6,14 @@ using System.Linq;
 public class MainLevel : SceneBase
 {
     [SerializeField]
+    private bool _isTimeFrozen;
+    public bool IsTimeFrozen
+    {
+        get { return _isTimeFrozen; }
+        set { _isTimeFrozen = value; }
+    }
+
+    [SerializeField]
     private List<GameObject> _playersList = new List<GameObject>();
     public List<GameObject> PlayersList { get { return _playersList; } }
 

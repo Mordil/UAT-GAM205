@@ -21,6 +21,7 @@ public static class ProjectSettings
         Enemy = 10,
         Floor = 11,
         Wall = 12,
-        InvisiWall = 13
+        InvisiWall = 13,
+        Powerup = 14
     }
 }

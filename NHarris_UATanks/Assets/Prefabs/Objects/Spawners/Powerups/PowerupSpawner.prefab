@@ -57,7 +57,6 @@ MonoBehaviour:
   _spawnDelay: 1.5
   _heightOffset: 1
   _spawnLogic: 0
-  _powerupType: 0
   _spawnedInstance: {fileID: 0}
   _myTransform: {fileID: 0}
   _powerupPrefabs: []
