@@ -1,4 +1,5 @@
 ﻿using L4.Unity.Common;
+using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(TankSettings), typeof(TankMotor), typeof(TankShooter))]
@@ -16,7 +17,13 @@ public class InputControllerBase : BaseScript
     [SerializeField]
     protected TankShooter ShooterComponent;
     [SerializeField]
+    protected TankController Controller;
+    [SerializeField]
     protected Transform MyTransform;
+
+    [ReadOnly]
+    [SerializeField]
+    protected List<IPowerup> CurrentPickups;
 
     protected override void CheckDependencies()
     {
@@ -25,7 +32,24 @@ public class InputControllerBase : BaseScript
         this.CheckAndAssignIfDependencyIsNull(ref Settings);
         this.CheckAndAssignIfDependencyIsNull(ref MotorComponent);
         this.CheckAndAssignIfDependencyIsNull(ref ShooterComponent);
+        this.CheckAndAssignIfDependencyIsNull(ref Controller);
         this.CheckAndAssignIfDependencyIsNull(ref MyTransform, true);
+    }
+
+    protected virtual void OnTriggerEnter(Collider otherObj)
+    {
+        if (otherObj.gameObject.IsOnSameLayer(ProjectSettings.Layers.Powerup))
+        {
+            IPowerup powerup = otherObj.gameObject.GetComponent<IPowerup>();
+
+            powerup.OnPickup(Controller);
+
+            // if the powerup is an actual pickup that we retain, then we'll add it to maintain
+            if (powerup.IsPickup)
+            {
+                CurrentPickups.Add(powerup);
+            }
+        }
     }
     
     /// <summary>

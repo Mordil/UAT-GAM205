@@ -70,6 +70,11 @@ public class TankController : BaseScript
         _currentHealth -= amount;
     }
 
+    public void AddHealth(int amount)
+    {
+        _currentHealth = Mathf.Clamp(_currentHealth + amount, 0, _settings.MaxHealth);
+    }
+
     /// <summary>
     /// Adds the amount provided to the tank's score if it is a player.
     /// </summary>

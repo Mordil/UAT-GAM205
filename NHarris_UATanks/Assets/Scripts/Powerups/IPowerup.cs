@@ -1,7 +1,9 @@
-﻿using System;
+﻿using L4.Unity.Common;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using UnityEngine;
 
 [Flags]
 public enum PowerupAffectedEntities { Players = 1, Enemies = 2 }
@@ -42,5 +44,47 @@ public static class IPowerupExtensions
         }
 
         return default(T);
+    }
+}
+
+public abstract class PowerupBase : BaseScript, IPowerup
+{
+    public abstract bool IsPermanent { get; }
+    public abstract bool IsPickup { get; }
+
+    public abstract float Duration { get; }
+
+    public virtual void OnPickup(TankController controller) { }
+    public virtual void OnUpdate(TankController controller) { }
+    public virtual void OnExpire(TankController controller)
+    {
+        Destroy(gameObject);
+    }
+
+    [SerializeField]
+    protected SphereCollider PickupCollider;
+    [SerializeField]
+    protected MeshRenderer PickupRenderer;
+
+    protected override void Awake()
+    {
+        Start();
+    }
+
+    protected override void CheckDependencies()
+    {
+        base.CheckDependencies();
+
+        this.CheckAndAssignIfDependencyIsNull(ref PickupCollider, true);
+        this.CheckAndAssignIfDependencyIsNull(ref PickupRenderer, true);
+    }
+
+    protected virtual void OnTriggerEnter(Collider otherObj)
+    {
+        if (otherObj.gameObject.IsOnSameLayer(ProjectSettings.Layers.Player))
+        {
+            PickupCollider.enabled = false;
+            PickupRenderer.enabled = false;
+        }
     }
 }

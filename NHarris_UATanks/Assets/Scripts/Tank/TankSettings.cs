@@ -73,4 +73,9 @@ public class TankSettings : MonoBehaviour
     private MovementSpeeds _movementSettings;
     [SerializeField]
     private BulletSettings _bulletSettings;
+
+    public void ModifyStat(int? health = null)
+    {
+        if (health.HasValue) { _maxHealth += health.Value; }
+    }
 }

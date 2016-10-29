@@ -1,15 +1,14 @@
-﻿using UnityEngine;
-using System.Collections;
-using L4.Unity.Common;
+﻿using L4.Unity.Common;
+using UnityEngine;
 
 [AddComponentMenu("Powerups/Time Freeze")]
 [RequireComponent(typeof(Rigidbody))]
-public class PowerupTimeFreeze : BaseScript, IPowerup
+public class PowerupTimeFreeze : PowerupBase
 {
-    public bool IsPermanent { get { return _isPermanent; } }
-    public bool IsPickup { get { return false; } }
+    public override bool IsPermanent { get { return _isPermanent; } }
+    public override bool IsPickup { get { return false; } }
 
-    public float Duration { get { return _duration; } }
+    public override float Duration { get { return _duration; } }
 
     [SerializeField]
     private bool _isPermanent;
@@ -23,22 +22,19 @@ public class PowerupTimeFreeze : BaseScript, IPowerup
     [SerializeField]
     private float _timeRemaining;
 
-    [SerializeField]
-    private SphereCollider _collider;
-    [SerializeField]
-    private MeshRenderer _renderer;
-
-    protected override void Awake()
+    public override void OnPickup(TankController controller)
     {
-        Start();
+        GameManager.Instance.CurrentScene.As<MainLevel>().IsTimeFrozen = true;
+
+        _isActive = true;
+        _timeRemaining = _duration;
     }
 
-    protected override void CheckDependencies()
+    public override void OnExpire(TankController controller)
     {
-        base.CheckDependencies();
+        GameManager.Instance.CurrentScene.As<MainLevel>().IsTimeFrozen = false;
 
-        this.CheckAndAssignIfDependencyIsNull(ref _collider, true);
-        this.CheckAndAssignIfDependencyIsNull(ref _renderer, true);
+        base.OnExpire(controller);
     }
 
     protected override void Update()
@@ -53,30 +49,4 @@ public class PowerupTimeFreeze : BaseScript, IPowerup
             }
         }
 	}
-    
-    private void OnTriggerEnter(Collider otherObj)
-    {
-        if (otherObj.gameObject.IsOnSameLayer(ProjectSettings.Layers.Player))
-        {
-            OnPickup(null);
-        }
-    }
-
-    public void OnPickup(TankController controller)
-    {
-        GameManager.Instance.CurrentScene.As<MainLevel>().IsTimeFrozen = true;
-
-        _isActive = true;
-        _timeRemaining = _duration;
-        _collider.enabled = false;
-        _renderer.enabled = false;
-    }
-
-    public void OnUpdate(TankController controller) { }
-
-    public void OnExpire(TankController controller)
-    {
-        GameManager.Instance.CurrentScene.As<MainLevel>().IsTimeFrozen = false;
-        Destroy(gameObject);
-    }
 }
