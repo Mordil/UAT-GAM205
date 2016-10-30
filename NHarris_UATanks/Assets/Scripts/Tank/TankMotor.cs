@@ -4,9 +4,9 @@ using UnityEngine;
 public class TankMotor : BaseScript
 {
     /// <summary>
-    /// The Tank GameObject's current forward position.
+    /// The Tank GameObject's transform.
     /// </summary>
-    public Vector3 ForwardVector { get { return _bodyTransform.forward; } }
+    public Transform TransformComponent { get { return _bodyTransform; } }
 
     // references to the gameobject containers' transforms for the tank body segments
     [SerializeField]

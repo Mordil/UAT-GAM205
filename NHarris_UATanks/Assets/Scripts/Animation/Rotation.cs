@@ -12,13 +12,25 @@ public class Rotation : BaseScript
     [SerializeField]
     private Transform _myTransform;
 
+    protected override void Awake()
+    {
+        Start();
+    }
+
     protected override void Update()
     {
         base.Update();
 
         if (_shouldRotate)
         {
-            transform.Rotate(_rotationAngles * Time.deltaTime);
+            _myTransform.Rotate(_rotationAngles * Time.deltaTime);
         }
+    }
+
+    protected override void CheckDependencies()
+    {
+        base.CheckDependencies();
+
+        this.CheckAndAssignIfDependencyIsNull(ref _myTransform, true);
     }
 }

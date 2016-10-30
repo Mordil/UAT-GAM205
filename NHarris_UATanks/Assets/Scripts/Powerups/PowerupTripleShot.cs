@@ -1,11 +1,13 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 [AddComponentMenu("Powerups/Triple Shot")]
 [RequireComponent(typeof(Rigidbody))]
 public class PowerupTripleShot : PowerupBase
 {
     public override bool IsPermanent { get { return _isPermanent; } }
-    public override bool IsPickup { get { return false; } }
+    public override bool IsPickup { get { return true; } }
+    public override bool HasExpired { get { return (_isActive) ? _timeRemaining <= 0 : false; } }
 
     public override float Duration { get { return _duration; } }
 
@@ -36,10 +38,5 @@ public class PowerupTripleShot : PowerupBase
     {
         _isActive = true;
         _timeRemaining = _duration;
-    }
-
-    public override bool OnUpdate(TankController controller)
-    {
-        return (_isActive) ? _timeRemaining <= 0 : false;
     }
 }

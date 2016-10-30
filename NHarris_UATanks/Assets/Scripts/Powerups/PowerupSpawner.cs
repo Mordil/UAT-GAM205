@@ -39,7 +39,7 @@ public class PowerupSpawner : BaseScript
 
     protected override void Update()
     {
-        if (!_spawnedInstanceCollider.enabled && _nextSpawnTime == 0)
+        if (_nextSpawnTime == 0 && !CheckIsInstanceAlive())
         {
             _nextSpawnTime = Time.time + _spawnDelay;
         }
@@ -63,7 +63,7 @@ public class PowerupSpawner : BaseScript
         _instancesSpawnedCount++;
 
         spawnedInstance.transform.SetParent(_myTransform, true);
-        spawnedInstance.name = spawnedInstance.GetHashCode().ToString() + "_SpawnedPowerup_" + _instancesSpawnedCount.ToString();
+        spawnedInstance.name = this.gameObject.GetHashCode().ToString() + "_SpawnedPowerup_" + _instancesSpawnedCount.ToString();
 
         _spawnedInstanceCollider = spawnedInstance.GetComponent<SphereCollider>();
         _nextSpawnTime = 0;
@@ -72,7 +72,7 @@ public class PowerupSpawner : BaseScript
     private bool CanSpawn()
     {
         // if there is still an instance alive, return false
-        if (_spawnedInstanceCollider.enabled || _powerupPrefabs.Count == 0)
+        if (_powerupPrefabs.Count == 0 || CheckIsInstanceAlive())
         {
             return false;
         }
@@ -81,6 +81,11 @@ public class PowerupSpawner : BaseScript
         bool enoughTimeHasPassed = Time.time >= _nextSpawnTime;
 
         return isSpawnCountLowEnough && enoughTimeHasPassed;
+    }
+
+    private bool CheckIsInstanceAlive()
+    {
+        return _spawnedInstanceCollider != null && _spawnedInstanceCollider.enabled;
     }
 
     private GameObject GetPowerupToSpawn()

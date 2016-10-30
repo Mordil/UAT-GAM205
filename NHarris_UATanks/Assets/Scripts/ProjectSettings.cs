@@ -22,6 +22,7 @@ public static class ProjectSettings
         Floor = 11,
         Wall = 12,
         InvisiWall = 13,
-        Powerup = 14
+        Powerup = 14,
+        AIListener = 15
     }
 }

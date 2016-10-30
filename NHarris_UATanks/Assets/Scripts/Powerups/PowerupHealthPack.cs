@@ -7,6 +7,7 @@ public class PowerupHealthPack : PowerupBase
 {
     public override bool IsPermanent { get { return _isPermanent; } }
     public override bool IsPickup { get { return false; } }
+    public override bool HasExpired { get { return false; } }
 
     public override float Duration { get { return 0f; } }
 

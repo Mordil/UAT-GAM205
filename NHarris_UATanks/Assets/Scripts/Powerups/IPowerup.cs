@@ -22,13 +22,13 @@ public interface IPowerup
 {
     bool IsPermanent { get; }
     bool IsPickup { get; }
+    bool HasExpired { get; }
 
     float Duration { get; }
 
     void OnPickup(TankController controller);
+    void OnUpdate(TankController controller);
     void OnExpire(TankController controller);
-
-    bool OnUpdate(TankController controller);
 }
 
 public static class IPowerupExtensions
@@ -49,16 +49,16 @@ public abstract class PowerupBase : BaseScript, IPowerup
 {
     public abstract bool IsPermanent { get; }
     public abstract bool IsPickup { get; }
+    public abstract bool HasExpired { get; }
 
     public abstract float Duration { get; }
 
     public abstract void OnPickup(TankController controller);
+    public virtual void OnUpdate(TankController controller) { }
     public virtual void OnExpire(TankController controller)
     {
         Destroy(gameObject);
     }
-
-    public virtual bool OnUpdate(TankController controller) { throw new NotImplementedException(); }
 
     [SerializeField]
     protected SphereCollider PickupCollider;
@@ -80,10 +80,7 @@ public abstract class PowerupBase : BaseScript, IPowerup
 
     protected virtual void OnTriggerEnter(Collider otherObj)
     {
-        if (otherObj.gameObject.IsOnSameLayer(ProjectSettings.Layers.Player))
-        {
-            PickupCollider.enabled = false;
-            PickupRenderer.enabled = false;
-        }
+        PickupCollider.enabled = false;
+        PickupRenderer.enabled = false;
     }
 }

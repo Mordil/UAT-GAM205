@@ -39,6 +39,7 @@ public class TankController : BaseScript
         base.Start();
 
         _currentHealth = _settings.MaxHealth;
+        _currentPickups = new List<IPowerup>();
 	}
 
     protected override void Awake()
@@ -54,16 +55,7 @@ public class TankController : BaseScript
             Destroy(this.gameObject);
         }
 
-        // loop through the powerups so that they can receive updates
-        foreach (IPowerup powerup in _currentPickups)
-        {
-            // if the powerup has signaled it is about to expire
-            if (powerup.OnUpdate(this))
-            {
-                // call the expiration
-                powerup.OnExpire(this);
-            }
-        }
+        UpdatePickups();
 	}
 
     protected virtual void OnCollisionEnter(Collision otherObj)
@@ -158,5 +150,30 @@ public class TankController : BaseScript
                 this.BroadcastMessage(TankController.TOOK_DAMAGE_MESSAGE, bullet.Owner, SendMessageOptions.DontRequireReceiver);
             }
         }
+    }
+
+    private void UpdatePickups()
+    {
+        List<IPowerup> itemsToRemove = new List<IPowerup>();
+
+        // loop through the powerups so that they can receive updates
+        foreach (IPowerup powerup in _currentPickups)
+        {
+            // if the powerup has signaled it is about to expire
+            if (powerup.HasExpired)
+            {
+                itemsToRemove.Add(powerup);
+            }
+            else
+            {
+                powerup.OnUpdate(this);
+            }
+        }
+
+        itemsToRemove.ForEach(powerup =>
+        {
+            powerup.OnExpire(this);
+            _currentPickups.Remove(powerup);
+        });
     }
 }

@@ -248,8 +248,11 @@ public class AIVisionSettings
 
     public void ListenForTarget(Vector3 position)
     {
-        _listenTarget = new GameObject(GetHashCode() + "_ListenTarget").transform;
-        _listenTarget.position = position;
+        if (_listenTarget == null)
+        {
+            _listenTarget = new GameObject(GetHashCode() + "_ListenTarget").transform;
+            _listenTarget.position = position;
+        }
     }
 
     public void Reset()
@@ -371,7 +374,7 @@ public class AIInputController : InputControllerBase
         // if the hearing/vision trigger isn't selected, find the first collider component that is a trigger
         if (_triggerSphereCollider == null)
         {
-            _triggerSphereCollider = GetComponents<SphereCollider>()
+            _triggerSphereCollider = GetComponentsInChildren<SphereCollider>()
                 .Where(x => x.isTrigger)
                 .First();
         }
@@ -510,6 +513,7 @@ public class AIInputController : InputControllerBase
         if (_currentTarget != shooterTransform)
         {
             _currentTarget = shooterTransform;
+            GoToMode(ActionMode.Chase);
         }
     }
 
@@ -533,6 +537,10 @@ public class AIInputController : InputControllerBase
                     Vector3 newScale = MyTransform.localScale * .5f;
                     newScale.y = 1;
                     MyTransform.localScale = newScale;
+
+                    var collider = GetComponent<SphereCollider>();
+                    collider.radius = .35f;
+                    collider.center = new Vector3(0, .1f, 0);
                 }
                 break;
 

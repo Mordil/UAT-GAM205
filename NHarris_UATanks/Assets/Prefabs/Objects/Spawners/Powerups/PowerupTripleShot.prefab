@@ -107,6 +107,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 669b110006caf85468a2b05534429f2f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  PickupCollider: {fileID: 135000013065286232}
+  PickupRenderer: {fileID: 23000011462512092}
+  _isPermanent: 0
+  _isActive: 0
+  _duration: 10
+  _timeRemaining: 0
 --- !u!114 &114000013392546270
 MonoBehaviour:
   m_ObjectHideFlags: 1

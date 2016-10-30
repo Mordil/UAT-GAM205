@@ -714,7 +714,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _sceneName: Level
-  _isTimeFrozen: 1
+  _isTimeFrozen: 0
   _playersList: []
   _displayTestLogs: 0
   _enemyCollection: {fileID: 1982145893}
@@ -1008,48 +1008,6 @@ MeshFilter:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 834425206}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
---- !u!1001 &856383568
-Prefab:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 4000012715940924, guid: f820affa5d2dd0b40b7144de71978858, type: 2}
-      propertyPath: m_LocalPosition.x
-      value: -0.768
-      objectReference: {fileID: 0}
-    - target: {fileID: 4000012715940924, guid: f820affa5d2dd0b40b7144de71978858, type: 2}
-      propertyPath: m_LocalPosition.y
-      value: 1.248
-      objectReference: {fileID: 0}
-    - target: {fileID: 4000012715940924, guid: f820affa5d2dd0b40b7144de71978858, type: 2}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4000012715940924, guid: f820affa5d2dd0b40b7144de71978858, type: 2}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4000012715940924, guid: f820affa5d2dd0b40b7144de71978858, type: 2}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4000012715940924, guid: f820affa5d2dd0b40b7144de71978858, type: 2}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4000012715940924, guid: f820affa5d2dd0b40b7144de71978858, type: 2}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4000012715940924, guid: f820affa5d2dd0b40b7144de71978858, type: 2}
-      propertyPath: m_RootOrder
-      value: 3
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-  m_ParentPrefab: {fileID: 100100000, guid: f820affa5d2dd0b40b7144de71978858, type: 2}
-  m_IsPrefabParent: 0
 --- !u!1001 &912410388
 Prefab:
   m_ObjectHideFlags: 0
@@ -2082,7 +2040,7 @@ Prefab:
     - target: {fileID: 114000012279025492, guid: 272370901210b21428b21561f4809898,
         type: 2}
       propertyPath: _patrolSettings._patrolPointThreshold
-      value: 5
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 114000012279025492, guid: 272370901210b21428b21561f4809898,
         type: 2}

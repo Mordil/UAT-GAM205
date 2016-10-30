@@ -27,13 +27,34 @@ public class TankShooter : BaseScript
     {
         BulletSettings bulletSettings = _tankSettings.BulletSettings;
 
+        SpawnBullet(_motor.TransformComponent.forward);
+
+        if (_controller.HasTripleShot)
+        {
+            var leftBullet = SpawnBullet((_motor.TransformComponent.forward - _motor.transform.right).normalized);
+            leftBullet.transform.RotateAround(leftBullet.transform.position, Vector3.up, -45f);
+
+            var rightBullet = SpawnBullet((_motor.TransformComponent.forward + _motor.transform.right).normalized);
+            rightBullet.transform.RotateAround(rightBullet.transform.position, Vector3.up, 45f);
+        }
+    }
+
+    private GameObject SpawnBullet(Vector3 direction)
+    {
+        BulletSettings bulletSettings = _tankSettings.BulletSettings;
+        
         // instantiate a bullet and keep a reference to the GameObject
-        var bullet = Instantiate(bulletSettings.Prefab,
-                                bulletSettings.SpawnPoint.position,
-                                bulletSettings.SpawnPoint.rotation * bulletSettings.Prefab.transform.rotation) as GameObject;
+        var bullet = Instantiate(
+            bulletSettings.Prefab,
+            bulletSettings.SpawnPoint.position,
+            bulletSettings.SpawnPoint.rotation * bulletSettings.Prefab.transform.rotation) as GameObject;
 
         // gives the bullet its forward trajectory and owner reference
         bullet.GetComponent<TankBullet>()
-            .Initialize(_motor.ForwardVector, _controller);
+            .Initialize(direction, _controller);
+
+        bullet.gameObject.name = this.gameObject.GetHashCode().ToString() + "_Bullet";
+
+        return bullet;
     }
 }
