@@ -23,6 +23,7 @@ public static class ProjectSettings
         Wall = 12,
         InvisiWall = 13,
         Powerup = 14,
-        AIListener = 15
+        AIListener = 15,
+        Door = 16
     }
 }

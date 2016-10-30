@@ -78,4 +78,9 @@ public class TankSettings : MonoBehaviour
     {
         if (health.HasValue) { _maxHealth += health.Value; }
     }
+
+    private void Awake()
+    {
+        _isPlayer = GetComponent<PlayerInputController>() != null;
+    }
 }
