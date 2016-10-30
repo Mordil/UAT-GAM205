@@ -1,7 +1,8 @@
 ﻿using L4.Unity.Common;
-using UnityEngine;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 public class MainLevel : SceneBase
 {
@@ -42,6 +43,8 @@ public class MainLevel : SceneBase
             .Where(x => x.IsPlayer)
             .Select(x => x.gameObject)
             .ToList();
+
+        UnityEngine.Random.InitState((int)DateTime.Now.Ticks);
     }
 
     protected override void LateUpdate()

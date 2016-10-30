@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 [AddComponentMenu("Powerups/Time Freeze")]
 [RequireComponent(typeof(Rigidbody))]

@@ -1,8 +1,5 @@
 ﻿using L4.Unity.Common;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using UnityEngine;
 
 [Flags]
@@ -29,8 +26,9 @@ public interface IPowerup
     float Duration { get; }
 
     void OnPickup(TankController controller);
-    void OnUpdate(TankController controller);
     void OnExpire(TankController controller);
+
+    bool OnUpdate(TankController controller);
 }
 
 public static class IPowerupExtensions
@@ -54,12 +52,13 @@ public abstract class PowerupBase : BaseScript, IPowerup
 
     public abstract float Duration { get; }
 
-    public virtual void OnPickup(TankController controller) { }
-    public virtual void OnUpdate(TankController controller) { }
+    public abstract void OnPickup(TankController controller);
     public virtual void OnExpire(TankController controller)
     {
         Destroy(gameObject);
     }
+
+    public virtual bool OnUpdate(TankController controller) { throw new NotImplementedException(); }
 
     [SerializeField]
     protected SphereCollider PickupCollider;

@@ -30,21 +30,16 @@ public class PowerupSpawner : BaseScript
 
     [ReadOnly]
     [SerializeField]
-    private GameObject _spawnedInstance;
+    private SphereCollider _spawnedInstanceCollider;
     [SerializeField]
     private Transform _myTransform;
 
     [SerializeField]
     private List<GameObject> _powerupPrefabs;
 
-    protected override void CheckDependencies()
-    {
-        this.CheckAndAssignIfDependencyIsNull(ref _myTransform, true);
-    }
-
     protected override void Update()
     {
-        if (_spawnedInstance == null && _nextSpawnTime == 0)
+        if (!_spawnedInstanceCollider.enabled && _nextSpawnTime == 0)
         {
             _nextSpawnTime = Time.time + _spawnDelay;
         }
@@ -56,20 +51,28 @@ public class PowerupSpawner : BaseScript
         }
     }
 
+    protected override void CheckDependencies()
+    {
+        this.CheckAndAssignIfDependencyIsNull(ref _myTransform, true);
+    }
+
     private void SpawnPowerup(GameObject powerup)
     {
-        _spawnedInstance = Instantiate(powerup,
-            _myTransform.position + new Vector3(0, _heightOffset, 0),
-            Quaternion.identity) as GameObject;
-        _spawnedInstance.transform.SetParent(_myTransform, true);
+        var spawnedInstance = Instantiate(powerup, _myTransform.position + new Vector3(0, _heightOffset, 0), Quaternion.identity) as GameObject;
+
         _instancesSpawnedCount++;
+
+        spawnedInstance.transform.SetParent(_myTransform, true);
+        spawnedInstance.name = spawnedInstance.GetHashCode().ToString() + "_SpawnedPowerup_" + _instancesSpawnedCount.ToString();
+
+        _spawnedInstanceCollider = spawnedInstance.GetComponent<SphereCollider>();
         _nextSpawnTime = 0;
     }
 
     private bool CanSpawn()
     {
         // if there is still an instance alive, return false
-        if (_spawnedInstance != null || _powerupPrefabs.Count == 0)
+        if (_spawnedInstanceCollider.enabled || _powerupPrefabs.Count == 0)
         {
             return false;
         }

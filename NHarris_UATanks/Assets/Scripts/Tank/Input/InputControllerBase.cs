@@ -35,22 +35,6 @@ public class InputControllerBase : BaseScript
         this.CheckAndAssignIfDependencyIsNull(ref Controller);
         this.CheckAndAssignIfDependencyIsNull(ref MyTransform, true);
     }
-
-    protected virtual void OnTriggerEnter(Collider otherObj)
-    {
-        if (otherObj.gameObject.IsOnSameLayer(ProjectSettings.Layers.Powerup))
-        {
-            IPowerup powerup = otherObj.gameObject.GetComponent<IPowerup>();
-
-            powerup.OnPickup(Controller);
-
-            // if the powerup is an actual pickup that we retain, then we'll add it to maintain
-            if (powerup.IsPickup)
-            {
-                CurrentPickups.Add(powerup);
-            }
-        }
-    }
     
     /// <summary>
     /// Fires a bullet with the ShooterComponent.

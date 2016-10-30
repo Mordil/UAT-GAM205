@@ -1,4 +1,6 @@
 ﻿using L4.Unity.Common;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 /*
@@ -11,6 +13,7 @@ public class TankController : BaseScript
     public const string TOOK_DAMAGE_MESSAGE = "OnTookDamage";
 
     public bool IsDead { get { return _currentHealth <= 0; } }
+    public bool HasTripleShot { get { return _currentPickups.Where(x => x is PowerupTripleShot).Count() > 0; } }
     
     public int CurrentHealth { get { return _currentHealth; } }
     public int CurrentScore { get { return _currentScore; } }
@@ -25,6 +28,10 @@ public class TankController : BaseScript
 
     [SerializeField]
     private TankSettings _settings;
+
+    [ReadOnly]
+    [SerializeField]
+    private List<IPowerup> _currentPickups;
 
     #region Unity Lifecycle
     protected override void Start()
@@ -46,6 +53,17 @@ public class TankController : BaseScript
         {
             Destroy(this.gameObject);
         }
+
+        // loop through the powerups so that they can receive updates
+        foreach (IPowerup powerup in _currentPickups)
+        {
+            // if the powerup has signaled it is about to expire
+            if (powerup.OnUpdate(this))
+            {
+                // call the expiration
+                powerup.OnExpire(this);
+            }
+        }
 	}
 
     protected virtual void OnCollisionEnter(Collision otherObj)
@@ -54,6 +72,22 @@ public class TankController : BaseScript
         if (otherObj.gameObject.IsOnSameLayer(ProjectSettings.Layers.Projectiles))
         {
             onBulletCollision(otherObj.gameObject.GetComponent<TankBullet>());
+        }
+    }
+
+    protected virtual void OnTriggerEnter(Collider otherObj)
+    {
+        if (otherObj.gameObject.IsOnSameLayer(ProjectSettings.Layers.Powerup))
+        {
+            IPowerup powerup = otherObj.gameObject.GetComponent<IPowerup>();
+
+            powerup.OnPickup(this);
+
+            // if the powerup is an actual pickup that we retain, then we'll add it to maintain
+            if (powerup.IsPickup)
+            {
+                _currentPickups.Add(powerup);
+            }
         }
     }
     #endregion

@@ -1,10 +1,8 @@
-﻿using L4.Unity.Common;
-using System;
-using UnityEngine;
+﻿using UnityEngine;
 
-[AddComponentMenu("Powerups/Time Freeze")]
+[AddComponentMenu("Powerups/Triple Shot")]
 [RequireComponent(typeof(Rigidbody))]
-public class PowerupTimeFreeze : PowerupBase
+public class PowerupTripleShot : PowerupBase
 {
     public override bool IsPermanent { get { return _isPermanent; } }
     public override bool IsPickup { get { return false; } }
@@ -12,11 +10,12 @@ public class PowerupTimeFreeze : PowerupBase
     public override float Duration { get { return _duration; } }
 
     [SerializeField]
+    [Tooltip("Add to the max health of the tank in addition to current health?")]
     private bool _isPermanent;
     [ReadOnly]
     [SerializeField]
     private bool _isActive;
-
+    
     [SerializeField]
     private float _duration = 1.5f;
     [ReadOnly]
@@ -30,26 +29,17 @@ public class PowerupTimeFreeze : PowerupBase
         if (_isActive && !_isPermanent)
         {
             _timeRemaining -= Time.deltaTime;
-
-            if (_timeRemaining <= 0)
-            {
-                OnExpire(null);
-            }
         }
     }
 
     public override void OnPickup(TankController controller)
     {
-        GameManager.Instance.CurrentScene.As<MainLevel>().IsTimeFrozen = true;
-
         _isActive = true;
         _timeRemaining = _duration;
     }
 
-    public override void OnExpire(TankController controller)
+    public override bool OnUpdate(TankController controller)
     {
-        GameManager.Instance.CurrentScene.As<MainLevel>().IsTimeFrozen = false;
-
-        base.OnExpire(controller);
+        return (_isActive) ? _timeRemaining <= 0 : false;
     }
 }
