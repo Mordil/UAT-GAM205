@@ -82,6 +82,7 @@ public class TankSettings : MonoBehaviour
 
     private void Awake()
     {
+        // assign the default ID of the tank and do a sanity check on if it's a player
         ID = this.gameObject.GetHashCode();
         _isPlayer = GetComponent<PlayerInputController>() != null;
     }

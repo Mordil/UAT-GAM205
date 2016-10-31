@@ -1,5 +1,4 @@
 ﻿using L4.Unity.Common;
-using System;
 using UnityEngine;
 
 [AddComponentMenu("Powerups/Time Freeze")]
@@ -28,10 +27,13 @@ public class PowerupTimeFreeze : PowerupBase
     {
         base.Update();
 
+        // only update time if it's currently active and not permanent
         if (_isActive && !_isPermanent)
         {
             _timeRemaining -= Time.deltaTime;
 
+            // if no time is left, kill self
+            // because this isn't a pickup, no other object should be calling this.
             if (_timeRemaining <= 0)
             {
                 OnExpire(null);
@@ -41,14 +43,17 @@ public class PowerupTimeFreeze : PowerupBase
 
     public override void OnPickup(TankController controller)
     {
+        // set the level as frozen
         GameManager.Instance.CurrentScene.As<MainLevel>().IsTimeFrozen = true;
 
+        // set active and time for lifecycle tracking
         _isActive = true;
         _timeRemaining = _duration;
     }
 
     public override void OnExpire(TankController controller)
     {
+        // unfreeze the level and call the parent expiration implementation
         GameManager.Instance.CurrentScene.As<MainLevel>().IsTimeFrozen = false;
 
         base.OnExpire(controller);

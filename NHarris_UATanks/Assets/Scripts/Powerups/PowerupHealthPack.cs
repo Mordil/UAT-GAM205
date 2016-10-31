@@ -27,6 +27,7 @@ public class PowerupHealthPack : PowerupBase
 
         controller.AddHealth(_value);
 
+        // this object doesn't have a duration, so just kill self
         OnExpire(null);
     }
 }

@@ -1,22 +1,9 @@
 ﻿using L4.Unity.Common;
-using System;
 using UnityEngine;
 
-[Flags]
-public enum PowerupAffectedEntities { Players = 1, Enemies = 2 }
-
-public static class PowerupAffectedEntitiesExtensions
-{
-    public static bool Is(this PowerupAffectedEntities self, PowerupAffectedEntities typeToCheck)
-    {
-        return (self & typeToCheck) == typeToCheck;
-    }
-
-    public static bool Has(this PowerupAffectedEntities self, PowerupAffectedEntities typeToCheck)
-    {
-        return (self | typeToCheck) == typeToCheck;
-    }
-}
+// I'm not sure if an interface is that beneficial as I implement it with a base class... I was originally planning on each powerup implementing the interface
+// if I can find time I'll rework it - but I doubt I will. This is how games have a bunch of "legacy" code in their shipped versions.
+// "If it ain't addin' value, it ain't gettin' done."
 
 public interface IPowerup
 {
@@ -31,23 +18,12 @@ public interface IPowerup
     void OnExpire(TankController controller);
 }
 
-public static class IPowerupExtensions
-{
-    public static T CastAs<T>(this IPowerup self)
-        where T : IPowerup
-    {
-        if (self is T)
-        {
-            return (T)(self);
-        }
-
-        return default(T);
-    }
-}
-
 public abstract class PowerupBase : BaseScript, IPowerup
 {
     public abstract bool IsPermanent { get; }
+    /// <summary>
+    /// If true, this object should be retained as a reference to call OnUpdate() every Update()
+    /// </summary>
     public abstract bool IsPickup { get; }
     public abstract bool HasExpired { get; }
 
@@ -80,6 +56,7 @@ public abstract class PowerupBase : BaseScript, IPowerup
 
     protected virtual void OnTriggerEnter(Collider otherObj)
     {
+        // hide the renderer and collider, as this object isn't destroyed until OnExpire() is called
         PickupCollider.enabled = false;
         PickupRenderer.enabled = false;
     }

@@ -3,6 +3,8 @@ using UnityEngine;
 
 public abstract class SpawnerBase : BaseScript
 {
+    // Easy identification of what type of spawner the prefab is
+
     public enum SpawnerType { Player, Enemy, Powerup }
 
     public abstract SpawnerType EntityType { get; }

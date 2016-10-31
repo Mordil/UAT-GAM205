@@ -52,6 +52,7 @@ public class Room : BaseScript
 
     public void OpenDoors(Doors doorsToClose)
     {
+        // flag checks for which doors to close in 1 call
         if (HasDoorValue(doorsToClose, Doors.North)) { _doors.North.SetActive(false); }
         if (HasDoorValue(doorsToClose, Doors.South)) { _doors.South.SetActive(false); }
         if (HasDoorValue(doorsToClose, Doors.East)) { _doors.East.SetActive(false); }
@@ -62,6 +63,7 @@ public class Room : BaseScript
     {
         GameObject[] array;
 
+        // determine which array to return based on the type parameter
         switch (type)
         {
             case SpawnerBase.SpawnerType.Enemy:
@@ -78,6 +80,9 @@ public class Room : BaseScript
                 break;
         }
 
+        // if they're disabled, they're no use to the caller
+        // note: this is mostly dead code, as I was planning on implementing a "randomize configuration" feature where spawners will be enabled/disabled during map generation
+        // but due to time, I cut that and all spawners are active all the time
         return array.Where(x => x.activeInHierarchy).ToArray();
     }
 

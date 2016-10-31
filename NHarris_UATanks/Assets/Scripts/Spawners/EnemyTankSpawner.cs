@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 
+// TODO: Refactor this into a base class for this & powerup spawner
+
 [AddComponentMenu("Spawners/Enemy Tank Spawner")]
 public class EnemyTankSpawner : SpawnerBase
 {
@@ -42,11 +44,13 @@ public class EnemyTankSpawner : SpawnerBase
 
     protected override void Update()
     {
+        // if the time hasn't been set
         if (_nextSpawnTime == 0)
         {
             _nextSpawnTime = Time.time + _spawnDelay;
         }
 
+        // if we can spawn, do it
         if (CanSpawn())
         {
             SpawnAITank();
@@ -55,18 +59,23 @@ public class EnemyTankSpawner : SpawnerBase
 
     private void SpawnAITank()
     {
+        // get the next prefab to spawn and instantiate it just above the spawner's transform, with the prefab's original rotation
         GameObject tank = GetTankPrefabToSpawn();
         var spawnedInstance = Instantiate(tank, MyTransform.position + Vector3.up, tank.transform.rotation) as GameObject;
 
+        // increment the count for future spawning logic
         _instancesSpawnedCount++;
 
+        // give a meaningful name, set it active (if the prefab was inactive for prefab limitation workarounds) and assign the parent for clean heirarchy
         spawnedInstance.transform.SetParent(MyTransform, true);
         spawnedInstance.name = "AITank_" + spawnedInstance.GetHashCode();
         spawnedInstance.SetActive(true);
 
+        // store the reference and reset the timer
         _currentSpawnedInstance = spawnedInstance;
         _nextSpawnTime = 0;
 
+        // send this message with the gameobject so the level can do necessary AITank spawning logic
         this.SendMessageUpwards(MainLevel.ENEMY_SPAWNED_MESSAGE, spawnedInstance);
     }
 

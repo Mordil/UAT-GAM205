@@ -4,6 +4,7 @@ using UnityEngine;
 [AddComponentMenu("Spawners/Powerups Spawner")]
 public class PowerupSpawner : SpawnerBase
 {
+    // How should picking prefabs work?
     private enum SpawnLogic { SinglePrefab, InSequence, Random }
 
     public override SpawnerType EntityType { get { return SpawnerType.Powerup; } }
@@ -38,13 +39,16 @@ public class PowerupSpawner : SpawnerBase
 
     protected override void Update()
     {
+        // if the last spawned instance isn't "alive" and the time has been reset
         if (_nextSpawnTime == 0 && !CheckIsInstanceAlive())
         {
+            // store the defined next spawn time
             _nextSpawnTime = Time.time + _spawnDelay;
         }
 
         if (CanSpawn())
         {
+            // spawn the picked next powerup prefab
             GameObject powerup = GetPowerupToSpawn();
             SpawnPowerup(powerup);
         }
@@ -52,13 +56,17 @@ public class PowerupSpawner : SpawnerBase
 
     private void SpawnPowerup(GameObject powerup)
     {
+        // spawn the prefab with the designer specified offset and its original rotation
         var spawnedInstance = Instantiate(powerup, MyTransform.position + new Vector3(0, _heightOffset, 0), powerup.transform.rotation) as GameObject;
 
+        // increment the counter for CanSpawn() logic
         _instancesSpawnedCount++;
 
+        // assign the parent for clean heirarchy and give it a meaningful name
         spawnedInstance.transform.SetParent(MyTransform, true);
         spawnedInstance.name = this.gameObject.GetHashCode().ToString() + "_SpawnedPowerup_" + _instancesSpawnedCount.ToString();
 
+        // assign the reference for "is alive" logic and reset the timer
         _spawnedInstanceCollider = spawnedInstance.GetComponent<SphereCollider>();
         _nextSpawnTime = 0;
     }
@@ -71,6 +79,7 @@ public class PowerupSpawner : SpawnerBase
             return false;
         }
 
+        // if this shouldn't spawn infinitely, check to see if we've spawned the max allowed
         bool isSpawnCountLowEnough = (_maxTimesToSpawn != 0) ? _instancesSpawnedCount < _maxTimesToSpawn : true;
         bool enoughTimeHasPassed = Time.time >= _nextSpawnTime;
 
@@ -79,6 +88,7 @@ public class PowerupSpawner : SpawnerBase
 
     private bool CheckIsInstanceAlive()
     {
+        // powerups don't destroy when they're collected, they deactivate their renderer and collider
         return _spawnedInstanceCollider != null && _spawnedInstanceCollider.enabled;
     }
 
