@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[AddComponentMenu("Powerups/Spawner")]
-public class PowerupSpawner : BaseScript
+[AddComponentMenu("Spawners/Powerups Spawner")]
+public class PowerupSpawner : SpawnerBase
 {
     private enum SpawnLogic { SinglePrefab, InSequence, Random }
+
+    public override SpawnerType EntityType { get { return SpawnerType.Powerup; } }
 
     [SerializeField]
     [Tooltip("The number of instances this spawner will spawn before stopping. If 0, will spawn infinitely.")]
@@ -31,8 +33,6 @@ public class PowerupSpawner : BaseScript
     [ReadOnly]
     [SerializeField]
     private SphereCollider _spawnedInstanceCollider;
-    [SerializeField]
-    private Transform _myTransform;
 
     [SerializeField]
     private List<GameObject> _powerupPrefabs;
@@ -51,18 +51,13 @@ public class PowerupSpawner : BaseScript
         }
     }
 
-    protected override void CheckDependencies()
-    {
-        this.CheckAndAssignIfDependencyIsNull(ref _myTransform, true);
-    }
-
     private void SpawnPowerup(GameObject powerup)
     {
-        var spawnedInstance = Instantiate(powerup, _myTransform.position + new Vector3(0, _heightOffset, 0), Quaternion.identity) as GameObject;
+        var spawnedInstance = Instantiate(powerup, MyTransform.position + new Vector3(0, _heightOffset, 0), powerup.transform.rotation) as GameObject;
 
         _instancesSpawnedCount++;
 
-        spawnedInstance.transform.SetParent(_myTransform, true);
+        spawnedInstance.transform.SetParent(MyTransform, true);
         spawnedInstance.name = this.gameObject.GetHashCode().ToString() + "_SpawnedPowerup_" + _instancesSpawnedCount.ToString();
 
         _spawnedInstanceCollider = spawnedInstance.GetComponent<SphereCollider>();
@@ -77,7 +72,7 @@ public class PowerupSpawner : BaseScript
             return false;
         }
 
-        bool isSpawnCountLowEnough = (_maxTimesToSpawn != 0) ?_maxTimesToSpawn < _instancesSpawnedCount : true;
+        bool isSpawnCountLowEnough = (_maxTimesToSpawn != 0) ? _instancesSpawnedCount < _maxTimesToSpawn : true;
         bool enoughTimeHasPassed = Time.time >= _nextSpawnTime;
 
         return isSpawnCountLowEnough && enoughTimeHasPassed;

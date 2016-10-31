@@ -53,6 +53,11 @@ public class TankController : BaseScript
         if (IsDead)
         {
             Destroy(this.gameObject);
+
+            if (Settings.IsPlayer)
+            {
+                this.SendMessageUpwards(MainLevel.PLAYER_DIED_MESSAGE, Settings.ID);
+            }
         }
 
         UpdatePickups();

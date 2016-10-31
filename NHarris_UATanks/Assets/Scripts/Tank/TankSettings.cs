@@ -46,6 +46,7 @@ public class TankSettings : MonoBehaviour
 {
     public bool IsPlayer { get { return _isPlayer; } }
 
+    public int ID { get; set; }
     public int MaxHealth { get { return _maxHealth; } }
     public int HealthRegenRate { get { return _healthRegenRate; } }
     public int KillValue { get { return _killValue; } }

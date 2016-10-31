@@ -13,14 +13,12 @@ public class MainLevelGeneratorSettings
 
     public int Rows;
     public int Columns;
-
-    [Header("Random Generation Settings")]
+    
     public int MinRows = 2;
     public int MaxRows = 5;
     public int MinColumns = 2;
     public int MaxColumns = 5;
-
-    [Header("Tile Settings")]
+    
     public float tileWidth = 50f;
     public float tileHeight = 50f;
 
@@ -39,6 +37,8 @@ public class MainLevelGeneratorSettings
 
 public class MainLevel : SceneBase
 {
+    public const string PLAYER_DIED_MESSAGE = "OnPlayerDeath";
+
     [SerializeField]
     private bool _isTimeFrozen;
     public bool IsTimeFrozen
@@ -59,6 +59,10 @@ public class MainLevel : SceneBase
 
     [SerializeField]
     private GameObject _environmentContainer;
+    [SerializeField]
+    private GameObject _playersContainer;
+    [SerializeField]
+    private GameObject _playerPrefab;
 
     [SerializeField]
     private MainLevelGeneratorSettings _mapGenerationSettings;
@@ -67,6 +71,10 @@ public class MainLevel : SceneBase
     [SerializeField]
     private Room[,] _roomsGrid;
 
+    [ReadOnly]
+    [SerializeField]
+    private List<GameObject> _playerSpawners;
+
     protected override void Start()
     {
         base.Start();
@@ -74,7 +82,14 @@ public class MainLevel : SceneBase
         _mapGenerationSettings.MapSeed = (_isLevelOfDay) ? GetDateAsInt() : (int)DateTime.Now.Ticks;
         UnityEngine.Random.InitState(_mapGenerationSettings.MapSeed);
 
+        _playerSpawners = new List<GameObject>();
+
         GenerateMap();
+
+        for (int i = 1; i <= GameManager.Instance.NumberOfPlayers; i++)
+        {
+            SpawnPlayer(i);
+        }
     }
 
     protected override void Awake()
@@ -95,16 +110,19 @@ public class MainLevel : SceneBase
             .ToList();
     }
 
-    protected override void LateUpdate()
-    {
-        base.Update();
-    }
-
     protected override void CheckDependencies()
     {
         base.CheckDependencies();
 
         this.CheckIfDependencyIsNull(_environmentContainer);
+    }
+
+    public void SpawnPlayer(int id)
+    {
+        var player = Instantiate(_playerPrefab, GetRandomPlayerSpawner().position, _playerPrefab.transform.rotation) as GameObject;
+        player.name = "Player_" + id;
+        player.transform.SetParent(_playersContainer.transform);
+        player.GetComponent<TankSettings>().ID = id;
     }
 
     private void GenerateMap()
@@ -138,6 +156,10 @@ public class MainLevel : SceneBase
                 _roomsGrid[j, i] = roomScript;
 
                 OpenRoomDoors(roomScript, j, i, columnsCount, rowsCount);
+
+                _playerSpawners = _playerSpawners
+                    .Union(roomScript.GetActiveSpawnersForType(SpawnerBase.SpawnerType.Player))
+                    .ToList();
             }
         }
     }
@@ -177,9 +199,20 @@ public class MainLevel : SceneBase
         roomToOpen.OpenDoors(doorsToOpen);
     }
 
+    private void OnPlayerDeath(int id)
+    {
+        // TODO: Implement lives
+        SpawnPlayer(id);
+    }
+
     private int GetDateAsInt()
     {
         var now = DateTime.Now;
         return now.Year + now.Month + now.Day;
+    }
+
+    private Transform GetRandomPlayerSpawner()
+    {
+        return _playerSpawners[UnityEngine.Random.Range(0, _playerSpawners.Count - 1)].transform;
     }
 }

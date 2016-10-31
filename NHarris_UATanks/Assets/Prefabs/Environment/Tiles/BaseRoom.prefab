@@ -180,7 +180,23 @@ GameObject:
   - 4: {fileID: 4000012849029470}
   - 114: {fileID: 114000010705560880}
   m_Layer: 0
-  m_Name: Room
+  m_Name: BaseRoom
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!1 &1000012066735478
+GameObject:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  serializedVersion: 4
+  m_Component:
+  - 4: {fileID: 4000010912212866}
+  - 114: {fileID: 114000011324153760}
+  m_Layer: 0
+  m_Name: PlayerSpawner
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -244,6 +260,21 @@ GameObject:
   - 23: {fileID: 23000012441092228}
   m_Layer: 16
   m_Name: Door_West
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!1 &1000013201208564
+GameObject:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  serializedVersion: 4
+  m_Component:
+  - 4: {fileID: 4000011226945582}
+  m_Layer: 0
+  m_Name: Players
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -431,6 +462,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 4000012515199082}
   m_RootOrder: 2
+--- !u!4 &4000010912212866
+Transform:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1000012066735478}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 1, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_Children: []
+  m_Father: {fileID: 4000011226945582}
+  m_RootOrder: 0
 --- !u!4 &4000010965903462
 Transform:
   m_ObjectHideFlags: 1
@@ -443,6 +487,20 @@ Transform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_Children: []
   m_Father: {fileID: 4000012036823946}
+  m_RootOrder: 2
+--- !u!4 &4000011226945582
+Transform:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1000013201208564}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_Children:
+  - {fileID: 4000010912212866}
+  m_Father: {fileID: 4000013703737992}
   m_RootOrder: 2
 --- !u!4 &4000011911783240
 Transform:
@@ -631,6 +689,7 @@ Transform:
   m_Children:
   - {fileID: 4000011911783240}
   - {fileID: 4000010755659082}
+  - {fileID: 4000011226945582}
   m_Father: {fileID: 4000012849029470}
   m_RootOrder: 3
 --- !u!4 &4000013982683152
@@ -1299,3 +1358,18 @@ MonoBehaviour:
     South: {fileID: 1000013328662224}
     East: {fileID: 1000013312298768}
     West: {fileID: 1000013045146934}
+  _playerSpawners: []
+  _enemySpawners: []
+  _powerupSpawners: []
+--- !u!114 &114000011324153760
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1000012066735478}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d2756a3959cfd14ba19a4ba126c5d10, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  MyTransform: {fileID: 0}

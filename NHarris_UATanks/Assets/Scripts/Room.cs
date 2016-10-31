@@ -1,7 +1,7 @@
-﻿using UnityEngine;
-using System.Collections;
-using L4.Unity.Common;
+﻿using L4.Unity.Common;
 using System;
+using System.Linq;
+using UnityEngine;
 
 public class Room : BaseScript
 {
@@ -19,6 +19,26 @@ public class Room : BaseScript
 
     [SerializeField]
     private DoorsContainer _doors;
+    [SerializeField]
+    private GameObject[] _playerSpawners;
+    [SerializeField]
+    private GameObject[] _enemySpawners;
+    [SerializeField]
+    private GameObject[] _powerupSpawners;
+
+    protected override void Start()
+    {
+        base.Start();
+
+        _playerSpawners = GetGameObjectsForType(SpawnerBase.SpawnerType.Player);
+        _enemySpawners = GetGameObjectsForType(SpawnerBase.SpawnerType.Enemy);
+        _powerupSpawners = GetGameObjectsForType(SpawnerBase.SpawnerType.Powerup);
+    }
+
+    protected override void Awake()
+    {
+        Start();
+    }
 
     protected override void CheckDependencies()
     {
@@ -38,8 +58,39 @@ public class Room : BaseScript
         if (HasDoorValue(doorsToClose, Doors.West)) { _doors.West.SetActive(false); }
     }
 
+    public GameObject[] GetActiveSpawnersForType(SpawnerBase.SpawnerType type)
+    {
+        GameObject[] array;
+
+        switch (type)
+        {
+            case SpawnerBase.SpawnerType.Enemy:
+                array = _enemySpawners;
+                break;
+
+            case SpawnerBase.SpawnerType.Powerup:
+                array = _powerupSpawners;
+                break;
+
+            case SpawnerBase.SpawnerType.Player:
+            default:
+                array = _playerSpawners;
+                break;
+        }
+
+        return array.Where(x => x.activeInHierarchy).ToArray();
+    }
+
     private bool HasDoorValue(Doors value, Doors valueToCheck)
     {
         return (value & valueToCheck) != 0;
+    }
+
+    private GameObject[] GetGameObjectsForType(SpawnerBase.SpawnerType type)
+    {
+        return GetComponentsInChildren<SpawnerBase>()
+            .Where(x => x.EntityType == type)
+            .Select(x => x.gameObject)
+            .ToArray();
     }
 }
