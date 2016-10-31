@@ -8,6 +8,10 @@ public class GameManager : AppManagerBase<GameManager>
 
     public enum Level { Main }
 
+    public int NumberOfPlayers { get { return _numberOfPlayers; } }
+
+    private int _numberOfPlayers = 1;
+
     private Level _currentLevel;
 
     public void GoToLevel(Level newLevel)

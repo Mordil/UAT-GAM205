@@ -46,6 +46,7 @@ public class TankSettings : MonoBehaviour
 {
     public bool IsPlayer { get { return _isPlayer; } }
 
+    public int ID { get; set; }
     public int MaxHealth { get { return _maxHealth; } }
     public int HealthRegenRate { get { return _healthRegenRate; } }
     public int KillValue { get { return _killValue; } }
@@ -73,4 +74,16 @@ public class TankSettings : MonoBehaviour
     private MovementSpeeds _movementSettings;
     [SerializeField]
     private BulletSettings _bulletSettings;
+
+    public void ModifyStat(int? health = null)
+    {
+        if (health.HasValue) { _maxHealth += health.Value; }
+    }
+
+    private void Awake()
+    {
+        // assign the default ID of the tank and do a sanity check on if it's a player
+        ID = this.gameObject.GetHashCode();
+        _isPlayer = GetComponent<PlayerInputController>() != null;
+    }
 }

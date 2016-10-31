@@ -9,6 +9,7 @@ public static class ProjectSettings
     public static class Tags
     {
         public const string BULLET = "Bullet";
+        public const string PATROL_POINT = "PatrolPoint";
     }
 
     /// <summary>
@@ -21,6 +22,9 @@ public static class ProjectSettings
         Enemy = 10,
         Floor = 11,
         Wall = 12,
-        InvisiWall = 13
+        InvisiWall = 13,
+        Powerup = 14,
+        AIListener = 15,
+        Door = 16
     }
 }

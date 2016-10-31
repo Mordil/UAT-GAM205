@@ -248,8 +248,11 @@ public class AIVisionSettings
 
     public void ListenForTarget(Vector3 position)
     {
-        _listenTarget = new GameObject(GetHashCode() + "_ListenTarget").transform;
-        _listenTarget.position = position;
+        if (_listenTarget == null)
+        {
+            _listenTarget = new GameObject(GetHashCode() + "_ListenTarget").transform;
+            _listenTarget.position = position;
+        }
     }
 
     public void Reset()
@@ -313,6 +316,8 @@ public class AIInputController : InputControllerBase
     private float _pathfindingExitTime;
     private float _timeTargetLeftVision;
 
+    private MainLevel _mainLevel;
+
     [Header("AI Settings")]
     #region serialized fields
     [SerializeField]
@@ -360,27 +365,39 @@ public class AIInputController : InputControllerBase
     #endregion
 
     #region Unity Methods
-    protected override void Awake()
+    protected override void Start()
     {
-        // because a tank can be instantiated at runtime, start won't be called, so we do it ourselves
-        Start();
+        base.Start();
 
         DoPersonalitySetup();
 
         // if the hearing/vision trigger isn't selected, find the first collider component that is a trigger
         if (_triggerSphereCollider == null)
         {
-            _triggerSphereCollider = GetComponents<SphereCollider>()
+            _triggerSphereCollider = GetComponentsInChildren<SphereCollider>()
                 .Where(x => x.isTrigger)
                 .First();
         }
 
         // make sure the trigger's radius is the proper size
         _triggerSphereCollider.radius = _visionSettings.HearingDistance;
+        _mainLevel = GameManager.Instance.CurrentScene.As<MainLevel>();
+    }
+
+    protected override void Awake()
+    {
+        // because a tank can be instantiated at runtime, start won't be called, so we do it ourselves
+        Start();
     }
 
     protected override void Update()
     {
+        // if time is frozen, skip this update loop
+        if (_mainLevel.IsTimeFrozen)
+        {
+            return;
+        }
+
         // if we're not already chasing, or if we're not fleeing, check for vision
         // of the current target
         if (_currentActionMode != ActionMode.Chase &&
@@ -465,7 +482,8 @@ public class AIInputController : InputControllerBase
         {
             GameObject obj = otherObj.gameObject;
 
-            if (obj.IsOnSameLayer(ProjectSettings.Layers.Player))
+            if (_currentTarget != null &&
+                obj.IsOnSameLayer(ProjectSettings.Layers.Player))
             {
                 // if the game object is the same player as our current target, mark the time if left our vision
                 if (obj == _currentTarget.gameObject)
@@ -495,6 +513,7 @@ public class AIInputController : InputControllerBase
         if (_currentTarget != shooterTransform)
         {
             _currentTarget = shooterTransform;
+            GoToMode(ActionMode.Chase);
         }
     }
 
@@ -518,6 +537,10 @@ public class AIInputController : InputControllerBase
                     Vector3 newScale = MyTransform.localScale * .5f;
                     newScale.y = 1;
                     MyTransform.localScale = newScale;
+
+                    var collider = GetComponent<SphereCollider>();
+                    collider.radius = .35f;
+                    collider.center = new Vector3(0, .1f, 0);
                 }
                 break;
 

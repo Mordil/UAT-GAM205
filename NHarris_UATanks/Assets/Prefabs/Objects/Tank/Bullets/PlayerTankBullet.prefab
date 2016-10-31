@@ -26,7 +26,7 @@ GameObject:
   - 54: {fileID: 54000010331538326}
   m_Layer: 8
   m_Name: PlayerTankBullet
-  m_TagString: Bullet
+  m_TagString: PatrolPoint
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -108,7 +108,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _damage: 10
   _lifespan: 3
-  _speed: 10
+  _speed: 15
   _rigidbody: {fileID: 0}
 --- !u!136 &136000011396334800
 CapsuleCollider:

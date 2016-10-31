@@ -1,4 +1,5 @@
 ﻿using L4.Unity.Common;
+using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(TankSettings), typeof(TankMotor), typeof(TankShooter))]
@@ -16,7 +17,13 @@ public class InputControllerBase : BaseScript
     [SerializeField]
     protected TankShooter ShooterComponent;
     [SerializeField]
+    protected TankController Controller;
+    [SerializeField]
     protected Transform MyTransform;
+
+    [ReadOnly]
+    [SerializeField]
+    protected List<IPowerup> CurrentPickups;
 
     protected override void CheckDependencies()
     {
@@ -25,6 +32,7 @@ public class InputControllerBase : BaseScript
         this.CheckAndAssignIfDependencyIsNull(ref Settings);
         this.CheckAndAssignIfDependencyIsNull(ref MotorComponent);
         this.CheckAndAssignIfDependencyIsNull(ref ShooterComponent);
+        this.CheckAndAssignIfDependencyIsNull(ref Controller);
         this.CheckAndAssignIfDependencyIsNull(ref MyTransform, true);
     }
     

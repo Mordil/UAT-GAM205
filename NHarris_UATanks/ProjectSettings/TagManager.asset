@@ -5,6 +5,7 @@ TagManager:
   serializedVersion: 2
   tags:
   - Bullet
+  - PatrolPoint
   layers:
   - Default
   - TransparentFX
@@ -20,9 +21,9 @@ TagManager:
   - Floor
   - Wall
   - InvisiWall
-  - 
-  - 
-  - 
+  - Powerup
+  - AIListener
+  - Door
   - 
   - 
   - 
