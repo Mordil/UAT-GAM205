@@ -9,6 +9,7 @@ public static class ProjectSettings
     public static class Tags
     {
         public const string BULLET = "Bullet";
+        public const string PATROL_POINT = "PatrolPoint";
     }
 
     /// <summary>

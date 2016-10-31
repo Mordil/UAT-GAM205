@@ -1,5 +1,4 @@
-﻿using L4.Unity.Common;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 [AddComponentMenu("Spawners/Powerups Spawner")]

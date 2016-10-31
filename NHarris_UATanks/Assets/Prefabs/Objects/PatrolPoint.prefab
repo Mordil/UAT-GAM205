@@ -21,7 +21,7 @@ GameObject:
   - 4: {fileID: 4000011347189930}
   m_Layer: 0
   m_Name: PatrolPoint
-  m_TagString: Untagged
+  m_TagString: PatrolPoint
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

@@ -151,6 +151,7 @@ MonoBehaviour:
   _isLevelOfDay: 0
   _environmentContainer: {fileID: 102024455}
   _playersContainer: {fileID: 1373006192}
+  _enemiesContainer: {fileID: 1982145893}
   _playerPrefab: {fileID: 1000010325877656, guid: b9a918b8107bf34448e4d95cc3024dbe,
     type: 2}
   _mapGenerationSettings:
@@ -166,6 +167,9 @@ MonoBehaviour:
     tileHeight: 50
     TilePrefabs:
     - {fileID: 1000010106943036, guid: 849fb65b083af9d4db23797121901aac, type: 2}
+    - {fileID: 1000014141195826, guid: 8f11f965c834bb54393e778ce70730c8, type: 2}
+    - {fileID: 1000013453100484, guid: e4fa8cfe83bb5e445bf4fe8ea43599e8, type: 2}
+    - {fileID: 1000012504725318, guid: 31f0d2b0670cafc48a8afd3567eecfe6, type: 2}
   _playerSpawners: []
 --- !u!4 &633940206
 Transform:

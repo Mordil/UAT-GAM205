@@ -38,6 +38,7 @@ public class MainLevelGeneratorSettings
 public class MainLevel : SceneBase
 {
     public const string PLAYER_DIED_MESSAGE = "OnPlayerDeath";
+    public const string ENEMY_SPAWNED_MESSAGE = "OnEnemySpawned";
 
     [SerializeField]
     private bool _isTimeFrozen;
@@ -61,6 +62,8 @@ public class MainLevel : SceneBase
     private GameObject _environmentContainer;
     [SerializeField]
     private GameObject _playersContainer;
+    [SerializeField]
+    private GameObject _enemiesContainer;
     [SerializeField]
     private GameObject _playerPrefab;
 
@@ -203,6 +206,12 @@ public class MainLevel : SceneBase
     {
         // TODO: Implement lives
         SpawnPlayer(id);
+    }
+
+    private void OnEnemySpawned(GameObject newEnemy)
+    {
+        newEnemy.transform.SetParent(_enemiesContainer.transform, true);
+        _enemyList.Add(newEnemy);
     }
 
     private int GetDateAsInt()

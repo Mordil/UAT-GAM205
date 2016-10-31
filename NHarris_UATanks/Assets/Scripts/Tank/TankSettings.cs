@@ -82,6 +82,7 @@ public class TankSettings : MonoBehaviour
 
     private void Awake()
     {
+        ID = this.gameObject.GetHashCode();
         _isPlayer = GetComponent<PlayerInputController>() != null;
     }
 }

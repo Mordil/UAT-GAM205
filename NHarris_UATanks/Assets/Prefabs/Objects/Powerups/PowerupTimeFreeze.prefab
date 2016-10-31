@@ -121,12 +121,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e4079d01b81132149b6403071020700d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  PickupCollider: {fileID: 0}
+  PickupRenderer: {fileID: 0}
   _isPermanent: 0
   _isActive: 0
-  _duration: 1.5
+  _duration: 5
   _timeRemaining: 0
-  _collider: {fileID: 0}
-  _renderer: {fileID: 0}
 --- !u!135 &135000011738854406
 SphereCollider:
   m_ObjectHideFlags: 1
