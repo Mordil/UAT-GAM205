@@ -78,6 +78,14 @@ public class MainLevel : SceneBase
     [SerializeField]
     private List<GameObject> _playerSpawners;
 
+    /// <summary>
+    /// Key = Player ID
+    /// Value = Player's lives remaining
+    /// </summary>
+    [ReadOnly]
+    [SerializeField]
+    private Dictionary<int, int> _playerLivesTable;
+
     protected override void Start()
     {
         base.Start();
@@ -86,12 +94,14 @@ public class MainLevel : SceneBase
         UnityEngine.Random.InitState(_mapGenerationSettings.MapSeed);
 
         _playerSpawners = new List<GameObject>();
+        _playerLivesTable = new Dictionary<int, int>();
 
         GenerateMap();
         
         for (int i = 1; i <= GameManager.Instance.Settings.NumberOfPlayers; i++)
         {
             SpawnPlayer(i);
+            _playerLivesTable.Add(i, GameManager.Instance.Settings.NumberOfLives);
         }
     }
 
@@ -113,6 +123,21 @@ public class MainLevel : SceneBase
             .ToList();
     }
 
+    protected override void Update()
+    {
+        int playersRemaining = 0;
+        foreach(var player in _playerLivesTable.Where(x => x.Value >= 0).Select(x => x.Key).ToList())
+        {
+            playersRemaining++;
+        }
+
+        if (playersRemaining == 0)
+        {
+            // TODO: Game over
+            Debug.Log("GAME OVER");
+        }
+    }
+
     protected override void CheckDependencies()
     {
         base.CheckDependencies();
@@ -120,7 +145,7 @@ public class MainLevel : SceneBase
         this.CheckIfDependencyIsNull(_environmentContainer);
     }
 
-    public void SpawnPlayer(int id)
+    public void SpawnPlayer(int id, bool playerLostGame = false)
     {
         var player = Instantiate(_playerPrefab, GetRandomPlayerSpawner().position, _playerPrefab.transform.rotation) as GameObject;
         player.name = "Player_" + id;
@@ -173,8 +198,15 @@ public class MainLevel : SceneBase
                 throw new IndexOutOfRangeException();
         }
 
-        player.GetComponentInChildren<Camera>()
-            .rect = new Rect(cameraX, cameraY, cameraRectWidth, cameraRectHeight);
+        var camera = player.GetComponentInChildren<Camera>();
+        camera.rect = new Rect(cameraX, cameraY, cameraRectWidth, cameraRectHeight);
+
+        if (playerLostGame)
+        {
+            player.gameObject.SetActive(false);
+            camera.transform.SetParent(_playersContainer.transform);
+            camera.gameObject.name = "Player_" + id + "_DeathCamera";
+        }
     }
 
     private void GenerateMap()
@@ -253,8 +285,16 @@ public class MainLevel : SceneBase
 
     private void OnPlayerDeath(int id)
     {
-        // TODO: Implement lives
-        SpawnPlayer(id);
+        int livesRemaining = _playerLivesTable[id]--;
+
+        if (livesRemaining > 0)
+        {
+            SpawnPlayer(id);
+        }
+        else
+        {
+            SpawnPlayer(id, true);
+        }
     }
 
     private void OnEnemySpawned(GameObject newEnemy)
