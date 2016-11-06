@@ -27,7 +27,14 @@ public class PowerupHealthPack : PowerupBase
 
         controller.AddHealth(_value);
 
-        // this object doesn't have a duration, so just kill self
+        PickupAudioSource.Play();
+
+        // after the clip has finished, invoke the wrapper method for OnExpire
+        Invoke("DelayedOnExpire", PickupAudioSource.clip.length);
+    }
+
+    private void DelayedOnExpire()
+    {
         OnExpire(null);
     }
 }

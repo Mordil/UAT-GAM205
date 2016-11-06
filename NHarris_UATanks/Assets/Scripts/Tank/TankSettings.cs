@@ -42,6 +42,12 @@ public class BulletSettings
     private Transform _spawnPoint;
 }
 
+[Serializable]
+public class DeathSettings
+{
+    public GameObject DeathParticlePrefab;
+}
+
 public class TankSettings : MonoBehaviour
 {
     public bool IsPlayer { get { return _isPlayer; } }
@@ -54,6 +60,7 @@ public class TankSettings : MonoBehaviour
 
     public MovementSpeeds MovementSettings { get { return _movementSettings; } }
     public BulletSettings BulletSettings { get { return _bulletSettings; } }
+    public DeathSettings DeathSettings { get { return _deathSettings; } }
 
     [SerializeField]
     private bool _isPlayer = false;
@@ -74,6 +81,8 @@ public class TankSettings : MonoBehaviour
     private MovementSpeeds _movementSettings;
     [SerializeField]
     private BulletSettings _bulletSettings;
+    [SerializeField]
+    private DeathSettings _deathSettings;
 
     public void ModifyStat(int? health = null)
     {

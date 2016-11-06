@@ -47,3 +47,8 @@
 	- Author: Little Robot Sound Factory
 	- Album: Fantasy Sound Effect Library
 	- Found at: http://www.littlerobotsoundfactory.com/
+
+- AudioClip_SFX_Powerup_HealthPack
+	- Original Name: "Replenish"
+	- AUthor: qubodup
+	- Found at: http://opengameart.org/content/replenish-life-force-sound

@@ -52,6 +52,12 @@ public class TankController : BaseScript
     {
         if (IsDead)
         {
+            var deathPrefab = Instantiate(
+                Settings.DeathSettings.DeathParticlePrefab,
+                this.gameObject.transform.position,
+                Settings.DeathSettings.DeathParticlePrefab.transform.rotation) as GameObject;
+
+            Destroy(deathPrefab, deathPrefab.GetComponent<ParticleSystem>().duration);
             Destroy(this.gameObject);
 
             if (Settings.IsPlayer)
@@ -141,7 +147,8 @@ public class TankController : BaseScript
     protected virtual void onBulletCollision(TankBullet bullet)
     {
         // if it's not friendly fire
-        if (bullet.Owner.gameObject.layer != this.gameObject.layer)
+        if (bullet.Owner != null &&
+            bullet.Owner.gameObject.layer != this.gameObject.layer)
         {
             TakeDamage(bullet.Damage);
 

@@ -88,8 +88,8 @@ public class MainLevel : SceneBase
         _playerSpawners = new List<GameObject>();
 
         GenerateMap();
-
-        for (int i = 1; i <= GameManager.Instance.NumberOfPlayers; i++)
+        
+        for (int i = 1; i <= GameManager.Instance.Settings.NumberOfPlayers; i++)
         {
             SpawnPlayer(i);
         }
@@ -126,6 +126,55 @@ public class MainLevel : SceneBase
         player.name = "Player_" + id;
         player.transform.SetParent(_playersContainer.transform);
         player.GetComponent<TankSettings>().ID = id;
+
+        float cameraRectWidth = 1f;
+        float cameraRectHeight = 1f;
+        float cameraX = 0;
+        float cameraY = 0;
+        int numberOfPlayers = GameManager.Instance.Settings.NumberOfPlayers;
+
+        switch (id)
+        {
+            case 1:
+                if (numberOfPlayers > 1)
+                {
+                    cameraY = .5f;
+                    cameraRectHeight = .5f;
+
+                    if (numberOfPlayers == 4)
+                    {
+                        cameraRectWidth = .5f;
+                    }
+                }
+                break;
+
+            case 2:
+                cameraRectHeight = .5f;
+
+                if (numberOfPlayers > 2)
+                {
+                    cameraRectWidth = .5f;
+                }
+                break;
+
+            case 3:
+            case 4:
+                cameraRectHeight = .5f;
+                cameraRectWidth = .5f;
+                cameraX = .5f;
+
+                if (id == 4)
+                {
+                    cameraY = .5f;
+                }
+                break;
+
+            default:
+                throw new IndexOutOfRangeException();
+        }
+
+        player.GetComponentInChildren<Camera>()
+            .rect = new Rect(cameraX, cameraY, cameraRectWidth, cameraRectHeight);
     }
 
     private void GenerateMap()
