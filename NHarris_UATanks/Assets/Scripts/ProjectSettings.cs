@@ -27,4 +27,10 @@ public static class ProjectSettings
         AIListener = 15,
         Door = 16
     }
+
+    public enum Levels : int
+    {
+        MainMenu = 0,
+        MainGameplay = 1
+    }
 }

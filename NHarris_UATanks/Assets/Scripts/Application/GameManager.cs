@@ -2,6 +2,7 @@
 using L4.Unity.Common.Application;
 using System;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 [Serializable]
 public class GameSettings : SettingsBase
@@ -16,17 +17,11 @@ public class GameSettings : SettingsBase
 
 public class GameManager : AppManagerBase<GameManager, GameSettings>
 {
-    // Stub work. All level logic are in SceneBase derivatives.
-    // The GameManger is for application level settings like audio, graphics, cheats enabled, etc.
-    // Any actual game logic is in their respective SceneBase level components.
+    private ProjectSettings.Levels _currentLevel;
 
-    public enum Level { Main }
-
-    private Level _currentLevel;
-
-    public void GoToLevel(Level newLevel)
+    public void GoToLevel(ProjectSettings.Levels newLevel)
     {
         _currentLevel = newLevel;
-        // TODO: Handle level changes
+        SceneManager.LoadScene((int)_currentLevel);
     }
 }
