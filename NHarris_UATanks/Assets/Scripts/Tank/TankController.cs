@@ -77,14 +77,11 @@ public class TankController : BaseScript
     public bool HasTripleShot { get { return _currentPickups.Where(x => x is PowerupTripleShot).Count() > 0; } }
     
     public int CurrentHealth { get { return _currentHealth; } }
-    public int CurrentScore { get { return _currentScore; } }
 
     public TankSettings Settings { get { return _settings; } }
 
     [SerializeField]
     private int _currentHealth;
-    [SerializeField]
-    private int _currentScore;
     private float _timeOfLastHealthGain;
 
     [SerializeField]
@@ -109,9 +106,11 @@ public class TankController : BaseScript
         if (Settings.IsPlayer)
         {
             // sync the UI
+            var level = GameManager.Instance.CurrentScene.As<MainLevel>();
+
             _healthHUDSettings.SyncHealthUI(_currentHealth, Settings.MaxHealth);
-            _playerHUDSettings.LivesLeftText.text = GameManager.Instance.CurrentScene.As<MainLevel>().GetLivesRemaining(Settings.ID).ToString();
-            _playerHUDSettings.ScoreText.text = "0";
+            _playerHUDSettings.LivesLeftText.text = level.GetLivesRemaining(Settings.ID).ToString();
+            _playerHUDSettings.ScoreText.text = level.GetScore(Settings.ID).ToString();
         }
 	}
 
@@ -210,8 +209,9 @@ public class TankController : BaseScript
         // only players get points
         if (_settings.IsPlayer)
         {
-            _currentScore += amount;
-            _playerHUDSettings.ScoreText.text = _currentScore.ToString();
+            var level = GameManager.Instance.CurrentScene.As<MainLevel>();
+            level.AddScore(amount, Settings.ID);
+            _playerHUDSettings.ScoreText.text = level.GetScore(Settings.ID).ToString();
         }
     }
 
