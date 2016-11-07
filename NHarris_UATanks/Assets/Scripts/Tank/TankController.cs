@@ -1,11 +1,29 @@
 ﻿using L4.Unity.Common;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.UI;
 
 /*
     NOTE: To see the code for L4.Unity.Common, go to https://github.com/Mordil/Unity-Utility.
 */
+
+[Serializable]
+public class TankHealthHUDController
+{
+    public Slider Slider;
+    public Image FillImage;
+    public Color FullHealthColor = Color.green;
+    public Color ZeroHealthColor = Color.red;
+
+    public void SyncHealthUI(int currentHealth, int maxHealth)
+    {
+        Slider.value = currentHealth;
+        Slider.maxValue = maxHealth;
+        FillImage.color = Color.Lerp(ZeroHealthColor, FullHealthColor, currentHealth / maxHealth);
+    }
+}
 
 [RequireComponent(typeof(TankSettings))]
 public class TankController : BaseScript
@@ -28,6 +46,8 @@ public class TankController : BaseScript
 
     [SerializeField]
     private TankSettings _settings;
+    [SerializeField]
+    private TankHealthHUDController _healthHUDSettings;
 
     [ReadOnly]
     [SerializeField]
@@ -40,6 +60,12 @@ public class TankController : BaseScript
 
         _currentHealth = _settings.MaxHealth;
         _currentPickups = new List<IPowerup>();
+
+        if (Settings.IsPlayer)
+        {
+            // sync the UI
+            _healthHUDSettings.SyncHealthUI(_currentHealth, Settings.MaxHealth);
+        }
 	}
 
     protected override void Awake()
@@ -105,11 +131,21 @@ public class TankController : BaseScript
     public void TakeDamage(int amount)
     {
         _currentHealth -= amount;
+
+        if (Settings.IsPlayer)
+        {
+            _healthHUDSettings.SyncHealthUI(_currentHealth, Settings.MaxHealth);
+        }
     }
 
     public void AddHealth(int amount)
     {
         _currentHealth = Mathf.Clamp(_currentHealth + amount, 0, _settings.MaxHealth);
+
+        if (Settings.IsPlayer)
+        {
+            _healthHUDSettings.SyncHealthUI(_currentHealth, Settings.MaxHealth);
+        }
     }
 
     /// <summary>
@@ -141,6 +177,11 @@ public class TankController : BaseScript
             _timeOfLastHealthGain = Time.time;
             _currentHealth += (int)(_settings.HealthRegenRate * timeDiff);
             _currentHealth = Mathf.Clamp(_currentHealth, 0, _settings.MaxHealth);
+
+            if (Settings.IsPlayer)
+            {
+                _healthHUDSettings.SyncHealthUI(_currentHealth, Settings.MaxHealth);
+            }
         }
     }
 
