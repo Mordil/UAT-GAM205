@@ -37,9 +37,14 @@ public class SettingsMenuController : BaseScript
         [Serializable]
         public class InputFieldComponents
         {
+            [Header("Audio Input")]
             public InputField MasterVolumeInput;
             public InputField SFXVolumeInput;
             public InputField MusicVolumeInput;
+
+            [Header("Gameplay Input")]
+            public InputField NumberOfPlayers;
+            public InputField NumberOfLives;
 
             public void CheckDependencies()
             {
@@ -57,18 +62,43 @@ public class SettingsMenuController : BaseScript
                 {
                     throw new UnityException("MusicVolumeInput has not been assigned!");
                 }
+
+                if (NumberOfPlayers == null)
+                {
+                    throw new UnityException("NumberOfPlayers has not been assigned!");
+                }
+
+                if (NumberOfLives == null)
+                {
+                    throw new UnityException("NumberOfLives has not been assigned!");
+                }
+            }
+        }
+        [Serializable]
+        public class ToggleFieldComponents
+        {
+            public Toggle MatchOfTheDayToggle;
+
+            public void CheckDependencies()
+            {
+                if (MatchOfTheDayToggle == null)
+                {
+                    throw new UnityException("MatchOfTheDayToggle has not been assigned!");
+                }
             }
         }
         #endregion
 
         public SliderComponents Sliders;
         public InputFieldComponents InputFields;
+        public ToggleFieldComponents Toggles;
 
         public void CheckDependencies()
         {
             // inner InspectorContainers should have their CheckDependencies called 
             Sliders.CheckDependencies();
             InputFields.CheckDependencies();
+            Toggles.CheckDependencies();
         }
     }
     
@@ -96,12 +126,20 @@ public class SettingsMenuController : BaseScript
         GameManager.Instance.Settings.MasterVolume = SettingsEditingComponents.Sliders.MasterVolumeSlider.value;
         GameManager.Instance.Settings.SFXVolume = SettingsEditingComponents.Sliders.SFXVolumeSlider.value;
         GameManager.Instance.Settings.MusicVolume = SettingsEditingComponents.Sliders.MusicVolumeSlider.value;
+        GameManager.Instance.Settings.MatchOfTheDay = SettingsEditingComponents.Toggles.MatchOfTheDayToggle.isOn;
+        GameManager.Instance.Settings.NumberOfPlayers = Int32.Parse(SettingsEditingComponents.InputFields.NumberOfPlayers.text);
+        GameManager.Instance.Settings.NumberOfLives = Int32.Parse(SettingsEditingComponents.InputFields.NumberOfLives.text);
     }
 
     public void OnRevertChangesButtonClicked()
     {
         // resets to the last "apply" state.
         InitDefaults();
+    }
+
+    public void CloseMenu()
+    {
+        GameManager.Instance.CurrentScene.As<MainMenu>().GoToMainMenu();
     }
 
     private void InitDefaults()
@@ -113,6 +151,11 @@ public class SettingsMenuController : BaseScript
         SettingsEditingComponents.InputFields.MasterVolumeInput.text = (GameManager.Instance.Settings.MasterVolume * 100).ToString();
         SettingsEditingComponents.InputFields.SFXVolumeInput.text = (GameManager.Instance.Settings.SFXVolume * 100).ToString();
         SettingsEditingComponents.InputFields.MusicVolumeInput.text = (GameManager.Instance.Settings.MusicVolume * 100).ToString();
+
+        SettingsEditingComponents.Toggles.MatchOfTheDayToggle.isOn = GameManager.Instance.Settings.MatchOfTheDay;
+
+        SettingsEditingComponents.InputFields.NumberOfLives.text = GameManager.Instance.Settings.NumberOfLives.ToString();
+        SettingsEditingComponents.InputFields.NumberOfPlayers.text = GameManager.Instance.Settings.NumberOfPlayers.ToString();
     }
 
     private void RegisterUIEvents()
@@ -122,7 +165,6 @@ public class SettingsMenuController : BaseScript
         #region InputField.onEndEdit handlers
         SettingsEditingComponents.InputFields.MasterVolumeInput.onEndEdit.AddListener((newString) =>
         {
-            Debug.Log("Buzz");
             // if the new string will be empty, revert changes
             if (newString == string.Empty)
             {
@@ -212,7 +254,6 @@ public class SettingsMenuController : BaseScript
         #region Slider.onValueChanged handlers
         SettingsEditingComponents.Sliders.MasterVolumeSlider.onValueChanged.AddListener((newValue) =>
         {
-            Debug.Log("Buzz 2");
             SettingsEditingComponents.InputFields.MasterVolumeInput.text = (newValue * 100).ToString();
         });
         SettingsEditingComponents.Sliders.MusicVolumeSlider.onValueChanged.AddListener((newValue) =>
