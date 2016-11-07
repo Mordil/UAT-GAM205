@@ -10,6 +10,26 @@ using UnityEngine.UI;
 */
 
 [Serializable]
+public class PlayerHUDController
+{
+    public Text LivesLeftText;
+    public Text ScoreText;
+
+    public void CheckDependencies()
+    {
+        if (LivesLeftText == null)
+        {
+            throw new UnityException("LivesLeftText has not been assigned!");
+        }
+
+        if (ScoreText == null)
+        {
+            throw new UnityException("ScoreText has not been assigned!");
+        }
+    }
+}
+
+[Serializable]
 public class TankHealthHUDController
 {
     public Slider Slider;
@@ -22,6 +42,29 @@ public class TankHealthHUDController
         Slider.value = currentHealth;
         Slider.maxValue = maxHealth;
         FillImage.color = Color.Lerp(ZeroHealthColor, FullHealthColor, currentHealth / maxHealth);
+    }
+
+    public void CheckDependencies()
+    {
+        if (Slider == null)
+        {
+            throw new UnityException("Slider has not been assigned!");
+        }
+
+        if (FillImage == null)
+        {
+            throw new UnityException("FillImage has not been assigned!");
+        }
+
+        if (FullHealthColor == null)
+        {
+            throw new UnityException("FullHealthColor has not been assigned!");
+        }
+
+        if (ZeroHealthColor == null)
+        {
+            throw new UnityException("ZeroHealthColor has not been assigned!");
+        }
     }
 }
 
@@ -48,6 +91,8 @@ public class TankController : BaseScript
     private TankSettings _settings;
     [SerializeField]
     private TankHealthHUDController _healthHUDSettings;
+    [SerializeField]
+    private PlayerHUDController _playerHUDSettings;
 
     [ReadOnly]
     [SerializeField]
@@ -65,6 +110,8 @@ public class TankController : BaseScript
         {
             // sync the UI
             _healthHUDSettings.SyncHealthUI(_currentHealth, Settings.MaxHealth);
+            _playerHUDSettings.LivesLeftText.text = GameManager.Instance.CurrentScene.As<MainLevel>().GetLivesRemaining(Settings.ID).ToString();
+            _playerHUDSettings.ScoreText.text = "0";
         }
 	}
 
@@ -125,6 +172,12 @@ public class TankController : BaseScript
     protected override void CheckDependencies()
     {
         this.CheckAndAssignIfDependencyIsNull(ref _settings);
+
+        if (Settings.IsPlayer)
+        {
+            _healthHUDSettings.CheckDependencies();
+            _playerHUDSettings.CheckDependencies();
+        }
     }
     #endregion
 
@@ -158,6 +211,7 @@ public class TankController : BaseScript
         if (_settings.IsPlayer)
         {
             _currentScore += amount;
+            _playerHUDSettings.ScoreText.text = _currentScore.ToString();
         }
     }
 

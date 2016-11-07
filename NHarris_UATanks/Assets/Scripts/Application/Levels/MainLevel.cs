@@ -206,6 +206,16 @@ public class MainLevel : SceneBase
         }
     }
 
+    public int GetLivesRemaining(int forID)
+    {
+        if (_playerLivesTable.ContainsKey(forID))
+        {
+            return _playerLivesTable[forID];
+        }
+
+        return -1;
+    }
+
     private void GenerateMap()
     {
         int rowsCount = (_mapGenerationSettings.RandomSize)
