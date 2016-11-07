@@ -54,10 +54,7 @@ public class MainLevel : SceneBase
 
     private List<GameObject> _enemyList = new List<GameObject>();
     public List<GameObject> EnemyList { get { return _enemyList; } }
-
-    [SerializeField]
-    private bool _isLevelOfDay;
-
+    
     [SerializeField]
     private GameObject _environmentContainer;
     [SerializeField]
@@ -90,7 +87,7 @@ public class MainLevel : SceneBase
     {
         base.Start();
         
-        _mapGenerationSettings.MapSeed = (_isLevelOfDay) ? GetDateAsInt() : (int)DateTime.Now.Ticks;
+        _mapGenerationSettings.MapSeed = (GameManager.Instance.Settings.MatchOfTheDay) ? GetDateAsInt() : (int)DateTime.Now.Ticks;
         UnityEngine.Random.InitState(_mapGenerationSettings.MapSeed);
 
         _playerSpawners = new List<GameObject>();

@@ -50,5 +50,9 @@
 
 - AudioClip_SFX_Powerup_HealthPack
 	- Original Name: "Replenish"
-	- AUthor: qubodup
+	- Author: qubodup
 	- Found at: http://opengameart.org/content/replenish-life-force-sound
+
+- AudioClip_SFX_UI_Button_Down
+	- Author: Koenig, Mike
+	- Found at: http://soundbible.com/1294-Button-Click-Off.html
