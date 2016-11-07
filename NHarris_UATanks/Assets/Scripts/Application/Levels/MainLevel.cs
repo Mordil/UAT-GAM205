@@ -35,16 +35,61 @@ public class MainLevelGeneratorSettings
     }
 }
 
+[Serializable]
+public class GameOverSettings
+{
+    public float OpacityPhasingSpeed;
+
+    public Camera GameOverCamera;
+    public Canvas GameOverUICanvas;
+
+    private CanvasGroup _canvasGroup;
+
+    public void CheckDependencies()
+    {
+        if (GameOverCamera == null)
+        {
+            throw new UnityException("GameOverCamera has not been assigned!");
+        }
+
+        if (GameOverUICanvas == null)
+        {
+            throw new UnityException("GameOverUICanvas has not been assigned!");
+        }
+
+        if (_canvasGroup == null)
+        {
+            _canvasGroup = GameOverUICanvas.GetComponentInChildren<CanvasGroup>();
+            _canvasGroup.alpha = 0;
+        }
+    }
+
+    public void PhaseOpacity()
+    {
+        float currentOpacity = _canvasGroup.alpha;
+
+        if (currentOpacity >= 1)
+        {
+            return;
+        }
+
+        float newOpacity = Mathf.Lerp(currentOpacity, 1, Time.deltaTime * OpacityPhasingSpeed);
+        _canvasGroup.alpha = newOpacity;
+    }
+}
+
 public class MainLevel : SceneBase
 {
     public const string PLAYER_DIED_MESSAGE = "OnPlayerDeath";
     public const string ENEMY_SPAWNED_MESSAGE = "OnEnemySpawned";
 
+    private enum State { Running, GameOver }
+
     [SerializeField]
     private bool _isTimeFrozen;
     public bool IsTimeFrozen
     {
-        get { return _isTimeFrozen; }
+        get { return _isTimeFrozen || _currentState == State.GameOver; }
         set { _isTimeFrozen = value; }
     }
 
@@ -54,10 +99,7 @@ public class MainLevel : SceneBase
 
     private List<GameObject> _enemyList = new List<GameObject>();
     public List<GameObject> EnemyList { get { return _enemyList; } }
-
-    [SerializeField]
-    private bool _isLevelOfDay;
-
+    
     [SerializeField]
     private GameObject _environmentContainer;
     [SerializeField]
@@ -69,6 +111,10 @@ public class MainLevel : SceneBase
 
     [SerializeField]
     private MainLevelGeneratorSettings _mapGenerationSettings;
+    [SerializeField]
+    private GameOverSettings _gameOverSettings;
+
+    private State _currentState = State.Running;
 
     [ReadOnly]
     [SerializeField]
@@ -78,21 +124,44 @@ public class MainLevel : SceneBase
     [SerializeField]
     private List<GameObject> _playerSpawners;
 
+    /// <summary>
+    /// Key = Player ID
+    /// Value = Player's lives remaining
+    /// </summary>
+    [ReadOnly]
+    [SerializeField]
+    private Dictionary<int, int> _playerLivesTable;
+    
+    /// <summary>
+    /// Key = Player ID
+    /// Value = Player's lives remaining
+    /// </summary>
+    [ReadOnly]
+    [SerializeField]
+    private Dictionary<int, int> _playerScoresTable;
+
     protected override void Start()
     {
         base.Start();
         
-        _mapGenerationSettings.MapSeed = (_isLevelOfDay) ? GetDateAsInt() : (int)DateTime.Now.Ticks;
+        _mapGenerationSettings.MapSeed = (GameManager.Instance.Settings.MatchOfTheDay) ? GetDateAsInt() : (int)DateTime.Now.Ticks;
         UnityEngine.Random.InitState(_mapGenerationSettings.MapSeed);
 
         _playerSpawners = new List<GameObject>();
+        _playerLivesTable = new Dictionary<int, int>();
+        _playerScoresTable = new Dictionary<int, int>();
 
         GenerateMap();
-
-        for (int i = 1; i <= GameManager.Instance.NumberOfPlayers; i++)
+        
+        for (int i = 1; i <= GameManager.Instance.Settings.NumberOfPlayers; i++)
         {
             SpawnPlayer(i);
+            _playerLivesTable.Add(i, GameManager.Instance.Settings.NumberOfLives);
+            _playerScoresTable.Add(i, 0);
         }
+
+        _gameOverSettings.GameOverCamera.gameObject.SetActive(false);
+        _gameOverSettings.GameOverUICanvas.gameObject.SetActive(false);
     }
 
     protected override void Awake()
@@ -113,19 +182,136 @@ public class MainLevel : SceneBase
             .ToList();
     }
 
+    protected override void Update()
+    {
+        if (_currentState != State.GameOver)
+        {
+            int playersRemaining = 0;
+            foreach (var player in _playerLivesTable.Where(x => x.Value >= 1).Select(x => x.Key).ToList())
+            {
+                playersRemaining++;
+            }
+
+            if (playersRemaining == 0)
+            {
+                _currentState = State.GameOver;
+
+                CalculateHighScore();
+
+                _gameOverSettings.GameOverCamera.gameObject.SetActive(true);
+                _gameOverSettings.GameOverUICanvas.gameObject.SetActive(true);
+
+                this.gameObject.GetComponent<AudioSource>().enabled = false;
+                this.gameObject.GetComponent<AudioListener>().enabled = false;
+
+                _playersContainer.GetComponentsInChildren<Camera>().ToList().ForEach(x => x.gameObject.SetActive(false));
+            }
+        }
+        else
+        {
+            _gameOverSettings.PhaseOpacity();
+        }
+    }
+
     protected override void CheckDependencies()
     {
         base.CheckDependencies();
 
         this.CheckIfDependencyIsNull(_environmentContainer);
+
+        _gameOverSettings.CheckDependencies();
     }
 
-    public void SpawnPlayer(int id)
+    public void SpawnPlayer(int id, bool playerLostGame = false)
     {
         var player = Instantiate(_playerPrefab, GetRandomPlayerSpawner().position, _playerPrefab.transform.rotation) as GameObject;
         player.name = "Player_" + id;
         player.transform.SetParent(_playersContainer.transform);
         player.GetComponent<TankSettings>().ID = id;
+
+        float cameraRectWidth = 1f;
+        float cameraRectHeight = 1f;
+        float cameraX = 0;
+        float cameraY = 0;
+        int numberOfPlayers = GameManager.Instance.Settings.NumberOfPlayers;
+
+        switch (id)
+        {
+            case 1:
+                if (numberOfPlayers > 1)
+                {
+                    cameraY = .5f;
+                    cameraRectHeight = .5f;
+
+                    if (numberOfPlayers == 4)
+                    {
+                        cameraRectWidth = .5f;
+                    }
+                }
+                break;
+
+            case 2:
+                cameraRectHeight = .5f;
+
+                if (numberOfPlayers > 2)
+                {
+                    cameraRectWidth = .5f;
+                }
+                break;
+
+            case 3:
+            case 4:
+                cameraRectHeight = .5f;
+                cameraRectWidth = .5f;
+                cameraX = .5f;
+
+                if (id == 4)
+                {
+                    cameraY = .5f;
+                }
+                break;
+
+            default:
+                throw new IndexOutOfRangeException();
+        }
+
+        var camera = player.GetComponentInChildren<Camera>();
+        camera.rect = new Rect(cameraX, cameraY, cameraRectWidth, cameraRectHeight);
+
+        if (playerLostGame)
+        {
+            player.gameObject.SetActive(false);
+            camera.transform.SetParent(_playersContainer.transform);
+            camera.gameObject.name = "Player_" + id + "_DeathCamera";
+        }
+    }
+
+    public void AddScore(int valueToAdd, int playerID)
+    {
+        if (_playerScoresTable.ContainsKey(playerID))
+        {
+            _playerScoresTable[playerID] += valueToAdd;
+        }
+    }
+
+    public int GetLivesRemaining(int forID)
+    {
+        if (_playerLivesTable.ContainsKey(forID))
+        {
+            return _playerLivesTable[forID] - 1;
+        }
+
+        return -1;
+    }
+
+    public int GetScore(int forID)
+    {
+        if (_playerScoresTable.ContainsKey(forID))
+        {
+            return _playerScoresTable[forID];
+        }
+
+        return -1;
     }
 
     private void GenerateMap()
@@ -204,14 +390,29 @@ public class MainLevel : SceneBase
 
     private void OnPlayerDeath(int id)
     {
-        // TODO: Implement lives
-        SpawnPlayer(id);
+        int livesRemaining = _playerLivesTable[id]--;
+
+        if (livesRemaining > 1)
+        {
+            SpawnPlayer(id);
+        }
+        else
+        {
+            SpawnPlayer(id, true);
+        }
     }
 
     private void OnEnemySpawned(GameObject newEnemy)
     {
         newEnemy.transform.SetParent(_enemiesContainer.transform, true);
         _enemyList.Add(newEnemy);
+    }
+
+    private void CalculateHighScore()
+    {
+        var highscoreID = _playerScoresTable.Aggregate((left, right) => left.Value > right.Value ? left : right).Key;
+        var highscoreName = "Player " + UnityEngine.Random.Range(0, 100) + " (" + DateTime.Now.ToString("ddd d MMM") + ")";
+        GameManager.Instance.HighScores.Add(highscoreName, _playerScoresTable[highscoreID]);
     }
 
     private int GetDateAsInt()

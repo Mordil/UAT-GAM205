@@ -1,7 +1,7 @@
 ﻿using L4.Unity.Common;
 using UnityEngine;
 
-[RequireComponent(typeof(TankSettings), typeof(TankMotor))]
+[RequireComponent(typeof(TankSettings), typeof(TankMotor), typeof(AudioSource))]
 public class TankShooter : BaseScript
 {
     [SerializeField]
@@ -11,6 +11,9 @@ public class TankShooter : BaseScript
     [SerializeField]
     private TankController _controller;
 
+    [SerializeField]
+    private AudioSource _shootingAudioSource;
+
     protected override void CheckDependencies()
     {
         base.CheckDependencies();
@@ -18,6 +21,8 @@ public class TankShooter : BaseScript
         this.CheckAndAssignIfDependencyIsNull(ref _tankSettings);
         this.CheckAndAssignIfDependencyIsNull(ref _motor);
         this.CheckAndAssignIfDependencyIsNull(ref _controller);
+
+        this.CheckIfDependencyIsNull(_shootingAudioSource);
     }
 
     /// <summary>
@@ -25,6 +30,8 @@ public class TankShooter : BaseScript
     /// </summary>
     public void Fire()
     {
+        _shootingAudioSource.Play();
+
         BulletSettings bulletSettings = _tankSettings.BulletSettings;
 
         SpawnBullet(_motor.TransformComponent.forward);

@@ -40,6 +40,8 @@ public abstract class PowerupBase : BaseScript, IPowerup
     protected SphereCollider PickupCollider;
     [SerializeField]
     protected MeshRenderer PickupRenderer;
+    [SerializeField]
+    protected AudioSource PickupAudioSource;
 
     protected override void Awake()
     {
@@ -52,6 +54,8 @@ public abstract class PowerupBase : BaseScript, IPowerup
 
         this.CheckAndAssignIfDependencyIsNull(ref PickupCollider, true);
         this.CheckAndAssignIfDependencyIsNull(ref PickupRenderer, true);
+
+        this.CheckIfDependencyIsNull(PickupAudioSource);
     }
 
     protected virtual void OnTriggerEnter(Collider otherObj)
@@ -59,5 +63,6 @@ public abstract class PowerupBase : BaseScript, IPowerup
         // hide the renderer and collider, as this object isn't destroyed until OnExpire() is called
         PickupCollider.enabled = false;
         PickupRenderer.enabled = false;
+        PickupAudioSource.Play();
     }
 }

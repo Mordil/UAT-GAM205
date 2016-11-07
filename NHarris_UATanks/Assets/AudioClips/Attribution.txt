@@ -1,0 +1,58 @@
+---- MUSIC ----
+- AudioClip_BackgroundMusic_MainMenu01
+	- Original Name: "Reading 'Stars and Stripes'"
+	- Author: World of Tanks
+	- Album: World of Tanks OST
+	- Found At: http://worldoftanks.com/en/content/music/
+	
+- AudioClip_BackgroundMusic_DeathScreen01
+	- Original Name: "American Warriors"
+	- Author: World of Tanks
+	- Album: World of Tanks OST
+	- Found At: http://worldoftanks.com/en/content/music/
+	
+- AudioClip_BackgroundMusic_Gameplay01
+	- Original Name: "Search and Destroy"
+	- Author: World of Tanks
+	- Album: World of Tanks OST
+	- Found At: http://worldoftanks.com/en/content/music/
+	
+- AudioClip_BackgroundMusic_Gameplay02
+	- Original Name: "Special Directive"
+	- Author: World of Tanks
+	- Album: World of Tanks OST
+	- Found At: http://worldoftanks.com/en/content/music/
+	
+- AudioClip_BackgroundMusic_Gameplay03
+	- Original Name: "Never Surrender!"
+	- Author: World of Tanks
+	- Album: World of Tanks OST
+	- Found At: http://worldoftanks.com/en/content/music/
+	
+- AudioClip_BackgroundMusic_Gameplay04
+	- Original Name: "Breaking the Frontline"
+	- Author: World of Tanks
+	- Album: World of Tanks OST
+	- Found At: http://worldoftanks.com/en/content/music/
+
+---- SFX ----
+- AudioClip_SFX_Powerup_TimeFreeze
+	- Original Name: "WarpDrive_02"
+	- Author: Little Robot Sound Factory
+	- Album: Sci-Fi Sound Library
+	- Found at: http://www.littlerobotsoundfactory.com/
+
+- AudioClip_SFX_Powerup_TripleShot
+	- Original Name: "Trap_02"
+	- Author: Little Robot Sound Factory
+	- Album: Fantasy Sound Effect Library
+	- Found at: http://www.littlerobotsoundfactory.com/
+
+- AudioClip_SFX_Powerup_HealthPack
+	- Original Name: "Replenish"
+	- Author: qubodup
+	- Found at: http://opengameart.org/content/replenish-life-force-sound
+
+- AudioClip_SFX_UI_Button_Down
+	- Author: Koenig, Mike
+	- Found at: http://soundbible.com/1294-Button-Click-Off.html

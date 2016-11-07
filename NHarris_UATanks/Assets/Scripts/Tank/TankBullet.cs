@@ -1,5 +1,4 @@
 ﻿using L4.Unity.Common;
-using System;
 using UnityEngine;
 
 /*
@@ -33,26 +32,30 @@ public class TankBullet : BaseScript
     [SerializeField]
     [Tooltip("Units (in meters) the bullet moves per second.")]
     private float _speed = 2f;
+    [SerializeField]
+    private float _lifespanOfExplosion = 1.5f;
 
-    private DateTime _timeOfDeath;
+    private float _timeOfDeath;
 
     [SerializeField]
     private Rigidbody _rigidbody;
+    [SerializeField]
+    private GameObject _explosionPrefab;
 
     #region Unity Lifecycle
     protected override void Awake()
     {
         // This component is created after the game has already started, so this done here instead of Start()
         this.CheckAndAssignIfDependencyIsNull(ref _rigidbody);
+        this.CheckIfDependencyIsNull(_explosionPrefab);
     }
 
     protected override void Update()
     {
         // if the time of death is now or in the past
-        if (DateTime.Now >= _timeOfDeath)
+        if (Time.time >= _timeOfDeath)
         {
-            // destroy the gameobject
-            Destroy(this.gameObject);
+            Die();
         }
     }
 
@@ -61,7 +64,7 @@ public class TankBullet : BaseScript
         // if the collision is not with the shooter
         if (Owner != null && Owner.gameObject != otherObj.gameObject)
         {
-            Destroy(this.gameObject);
+            Die();
         }
     }
     #endregion
@@ -74,10 +77,20 @@ public class TankBullet : BaseScript
     public void Initialize(Vector3 forwardVector, TankController owner)
     {
         this.Owner = owner;
-        this._timeOfDeath = DateTime.Now.AddSeconds(_lifespan);
+        this._timeOfDeath = Time.time + _lifespan;
         
         // To translate forward movement to 1 meter per second (the rate _speed is at),
         // it needs to be multiplied by 50 units.
         _rigidbody.AddForce(forwardVector * (_speed * 50), ForceMode.Force);
+    }
+
+    private void Die()
+    {
+        // instantiate an explosion and schedule it's destruction
+        var explosion = Instantiate(_explosionPrefab, transform.position, _explosionPrefab.transform.rotation) as GameObject;
+        Destroy(explosion, _lifespanOfExplosion);
+
+        // destroy the gameobject
+        Destroy(this.gameObject);
     }
 }
