@@ -1,5 +1,6 @@
 ﻿using L4.Unity.Common;
 using System;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -9,15 +10,21 @@ public class GameOverMenuController : BaseScript
     [Serializable]
     private class ScoreboardSettings
     {
-        public Text HighScoreText;
+        public Text HighScoreValueText;
+        public Text HighScoreLabelText;
         public GameObject[] PlayerScorePanels = new GameObject[4];
         public Text[] PlayerScoreText = new Text[4];
 
         public void CheckDependencies()
         {
-            if (HighScoreText == null)
+            if (HighScoreValueText == null)
             {
-                throw new UnityException("HighScoreText reference not set!");
+                throw new UnityException("HighScoreValueText reference not set!");
+            }
+
+            if (HighScoreLabelText == null)
+            {
+                throw new UnityException("HighScoreLabelText reference not set!");
             }
 
             foreach (GameObject panel in PlayerScorePanels)
@@ -51,6 +58,10 @@ public class GameOverMenuController : BaseScript
     protected override void Awake()
     {
         Start();
+
+        var highscore = GameManager.Instance.HighScores.Aggregate((left, right) => (left.Value > right.Value) ? left : right);
+        _scoreboard.HighScoreLabelText.text = highscore.Key;
+        _scoreboard.HighScoreValueText.text = highscore.Value.ToString();
     }
 
     protected override void CheckDependencies()

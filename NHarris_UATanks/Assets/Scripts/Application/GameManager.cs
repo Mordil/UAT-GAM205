@@ -46,6 +46,8 @@ public class GameManager : AppManagerBase<GameManager, GameSettings>
     {
         base.Start();
 
+        Instance.HighScores = new Dictionary<string, int>();
+
         LoadSave();
     }
 
@@ -66,7 +68,7 @@ public class GameManager : AppManagerBase<GameManager, GameSettings>
             MasterVolume = Settings.MasterVolume,
             MusicVolume = Settings.MusicVolume,
             SFXVolume = Settings.SFXVolume,
-            Highscores = HighScores
+            Highscores = GameManager.Instance.HighScores
         };
 
         var formatter = new BinaryFormatter();
@@ -92,7 +94,7 @@ public class GameManager : AppManagerBase<GameManager, GameSettings>
             Settings.SFXVolume = save.SFXVolume;
             Settings.AmbientVolume = save.AmbientVolume;
 
-            HighScores = save.Highscores;
+            HighScores = (save.Highscores == null) ? new Dictionary<string, int>() : save.Highscores;
         }
     }
 

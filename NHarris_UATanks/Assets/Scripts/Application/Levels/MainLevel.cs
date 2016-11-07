@@ -89,7 +89,7 @@ public class MainLevel : SceneBase
     private bool _isTimeFrozen;
     public bool IsTimeFrozen
     {
-        get { return _isTimeFrozen; }
+        get { return _isTimeFrozen || _currentState == State.GameOver; }
         set { _isTimeFrozen = value; }
     }
 
@@ -195,6 +195,9 @@ public class MainLevel : SceneBase
             if (playersRemaining == 0)
             {
                 _currentState = State.GameOver;
+
+                CalculateHighScore();
+
                 _gameOverSettings.GameOverCamera.gameObject.SetActive(true);
                 _gameOverSettings.GameOverUICanvas.gameObject.SetActive(true);
 
@@ -202,7 +205,6 @@ public class MainLevel : SceneBase
                 this.gameObject.GetComponent<AudioListener>().enabled = false;
 
                 _playersContainer.GetComponentsInChildren<Camera>().ToList().ForEach(x => x.gameObject.SetActive(false));
-                CalculateHighScore();
             }
         }
         else
@@ -409,8 +411,8 @@ public class MainLevel : SceneBase
     private void CalculateHighScore()
     {
         var highscoreID = _playerScoresTable.Aggregate((left, right) => left.Value > right.Value ? left : right).Key;
-        var highscoreName = "Player " + highscoreID + "(" + DateTime.Now.ToString("ddd d MMM") + ")";
-        GameManager.Instance.HighScores.Add("", _playerScoresTable[highscoreID]);
+        var highscoreName = "Player " + UnityEngine.Random.Range(0, 100) + " (" + DateTime.Now.ToString("ddd d MMM") + ")";
+        GameManager.Instance.HighScores.Add(highscoreName, _playerScoresTable[highscoreID]);
     }
 
     private int GetDateAsInt()
