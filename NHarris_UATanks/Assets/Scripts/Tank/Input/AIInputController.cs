@@ -547,7 +547,7 @@ public class AIInputController : InputControllerBase
             // if the tank is aggressive, update its scale for visual feedback
             case Personality.Aggressive:
                 {
-                    Vector3 newScale = MyTransform.localScale * 1.5f;
+                    Vector3 newScale = MyTransform.localScale * 1.15f;
                     newScale.y = 1;
                     MyTransform.localScale = newScale;
                 }
