@@ -11,7 +11,9 @@ public class MainLevelGeneratorSettings
 
     public int MapSeed;
 
+    [ReadOnly]
     public int Rows;
+    [ReadOnly]
     public int Columns;
     
     public int MinRows = 2;
@@ -187,7 +189,7 @@ public class MainLevel : SceneBase
         if (_currentState != State.GameOver)
         {
             int playersRemaining = 0;
-            foreach (var player in _playerLivesTable.Where(x => x.Value >= 1).Select(x => x.Key).ToList())
+            foreach (var _ in _playerLivesTable.Where(x => x.Value >= 1).Select(x => x.Key).ToList())
             {
                 playersRemaining++;
             }
