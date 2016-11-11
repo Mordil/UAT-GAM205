@@ -9,6 +9,9 @@ public class EnemyTankSpawner : SpawnerBase
 
     public override SpawnerType EntityType { get { return SpawnerType.Enemy; } }
 
+    public int InstancesSpawned { get { return _instancesSpawnedCount; } }
+    public int MaxInstancesToSpawn { get { return _maxToSpawn; } }
+
     [SerializeField]
     private int _maxToSpawn = 1;
     [ReadOnly]
