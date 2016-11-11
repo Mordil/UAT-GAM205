@@ -101,7 +101,7 @@ public class EnemyTankSpawner : SpawnerBase
                 return GetNextTankPrefab();
 
             case SpawnLogic.Random:
-                return _tankPrefabs[UnityEngine.Random.Range(0, _tankPrefabs.Length - 1)];
+                return _tankPrefabs[UnityEngine.Random.Range(0, _tankPrefabs.Length)];
 
             case SpawnLogic.SinglePrefab:
             default:

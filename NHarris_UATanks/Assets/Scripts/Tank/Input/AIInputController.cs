@@ -799,10 +799,11 @@ public class AIInputController : InputControllerBase
         if (Physics.Raycast(MyTransform.position, MyTransform.forward, out ray, speed))
         {
             GameObject obj = ray.collider.gameObject;
-
+            
             // return if the object hit was a player, flee target, or projectile (these are non blockers)
             return obj.IsOnSameLayer(ProjectSettings.Layers.Player) ||
                 obj.IsOnSameLayer(ProjectSettings.Layers.Projectiles) ||
+                obj.IsOnSameLayer(ProjectSettings.Layers.Floor) ||
                 (_fleeSettings.Target != null && obj == _fleeSettings.Target.gameObject);
         }
         // return true in all other cases

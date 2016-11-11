@@ -17,6 +17,7 @@ public static class ProjectSettings
     /// </summary>
     public enum Layers : int
     {
+        Default = 0,
         Projectiles = 8,
         Player = 9,
         Enemy = 10,

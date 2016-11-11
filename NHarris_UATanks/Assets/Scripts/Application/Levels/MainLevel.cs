@@ -31,7 +31,7 @@ public class MainLevelGeneratorSettings
             throw new UnityException("No prefabs have been assigned to the MainLevel for map generation!");
         }
 
-        return TilePrefabs[UnityEngine.Random.Range(0, TilePrefabs.Length - 1)];
+        return TilePrefabs[UnityEngine.Random.Range(0, TilePrefabs.Length)];
     }
 }
 
@@ -317,10 +317,10 @@ public class MainLevel : SceneBase
     private void GenerateMap()
     {
         int rowsCount = (_mapGenerationSettings.RandomSize)
-            ? UnityEngine.Random.Range(_mapGenerationSettings.MinRows, _mapGenerationSettings.MaxRows)
+            ? UnityEngine.Random.Range(_mapGenerationSettings.MinRows, _mapGenerationSettings.MaxRows + 1)
             : _mapGenerationSettings.Rows;
         int columnsCount = (_mapGenerationSettings.RandomSize)
-            ? UnityEngine.Random.Range(_mapGenerationSettings.MinColumns, _mapGenerationSettings.MaxColumns)
+            ? UnityEngine.Random.Range(_mapGenerationSettings.MinColumns, _mapGenerationSettings.MaxColumns + 1)
             : _mapGenerationSettings.Columns;
 
         // sync the data so the inspector has correct info of the number of columns/rows if it was randomly generated
@@ -423,6 +423,6 @@ public class MainLevel : SceneBase
 
     private Transform GetRandomPlayerSpawner()
     {
-        return _playerSpawners[UnityEngine.Random.Range(0, _playerSpawners.Count - 1)].transform;
+        return _playerSpawners[UnityEngine.Random.Range(0, _playerSpawners.Count)].transform;
     }
 }
