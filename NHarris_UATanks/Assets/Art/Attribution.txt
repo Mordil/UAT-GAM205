@@ -1,0 +1,10 @@
+---- TEXTURES ----
+- Texture_Menus_MainBackground01
+	- Original Name: "Exclusive WOT British Tanks Desert"
+	- Author: World of Tanks
+	- Found At: https://tagn.files.wordpress.com/2012/11/exclusive_wot_british_tanks_artwork_exclusive_desert_smaller.jpg
+
+- Texture_Menus_MainBackground_Settings01
+	- Original Name: "Italian Tanks World of Tanks Wallpaper"
+	- Author: World of Tanks
+	- Found At: https://www.google.com/search?q=world+of+tanks+settings+background&espv=2&biw=1920&bih=916&source=lnms&tbm=isch&sa=X&ved=0ahUKEwjoqofHvZPQAhVQ42MKHQ0lDgsQ_AUIBigB&dpr=1#tbm=isch&q=world+of+tanks+background&imgrc=fDlAe8Mlz4gx7M%3A
