@@ -9,6 +9,9 @@ public class EnemyTankSpawner : SpawnerBase
 
     public override SpawnerType EntityType { get { return SpawnerType.Enemy; } }
 
+    public int InstancesSpawned { get { return _instancesSpawnedCount; } }
+    public int MaxInstancesToSpawn { get { return _maxToSpawn; } }
+
     [SerializeField]
     private int _maxToSpawn = 1;
     [ReadOnly]
@@ -101,7 +104,7 @@ public class EnemyTankSpawner : SpawnerBase
                 return GetNextTankPrefab();
 
             case SpawnLogic.Random:
-                return _tankPrefabs[UnityEngine.Random.Range(0, _tankPrefabs.Length - 1)];
+                return _tankPrefabs[UnityEngine.Random.Range(0, _tankPrefabs.Length)];
 
             case SpawnLogic.SinglePrefab:
             default:

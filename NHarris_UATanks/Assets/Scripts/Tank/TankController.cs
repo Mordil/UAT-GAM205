@@ -55,16 +55,6 @@ public class TankHealthHUDController
         {
             throw new UnityException("FillImage has not been assigned!");
         }
-
-        if (FullHealthColor == null)
-        {
-            throw new UnityException("FullHealthColor has not been assigned!");
-        }
-
-        if (ZeroHealthColor == null)
-        {
-            throw new UnityException("ZeroHealthColor has not been assigned!");
-        }
     }
 }
 

@@ -11,7 +11,9 @@ public class MainLevelGeneratorSettings
 
     public int MapSeed;
 
+    [ReadOnly]
     public int Rows;
+    [ReadOnly]
     public int Columns;
     
     public int MinRows = 2;
@@ -31,7 +33,7 @@ public class MainLevelGeneratorSettings
             throw new UnityException("No prefabs have been assigned to the MainLevel for map generation!");
         }
 
-        return TilePrefabs[UnityEngine.Random.Range(0, TilePrefabs.Length - 1)];
+        return TilePrefabs[UnityEngine.Random.Range(0, TilePrefabs.Length)];
     }
 }
 
@@ -123,6 +125,9 @@ public class MainLevel : SceneBase
     [ReadOnly]
     [SerializeField]
     private List<GameObject> _playerSpawners;
+    [ReadOnly]
+    [SerializeField]
+    private List<EnemyTankSpawner> _enemySpawners;
 
     /// <summary>
     /// Key = Player ID
@@ -148,6 +153,7 @@ public class MainLevel : SceneBase
         UnityEngine.Random.InitState(_mapGenerationSettings.MapSeed);
 
         _playerSpawners = new List<GameObject>();
+        _enemySpawners = new List<EnemyTankSpawner>();
         _playerLivesTable = new Dictionary<int, int>();
         _playerScoresTable = new Dictionary<int, int>();
 
@@ -186,26 +192,8 @@ public class MainLevel : SceneBase
     {
         if (_currentState != State.GameOver)
         {
-            int playersRemaining = 0;
-            foreach (var player in _playerLivesTable.Where(x => x.Value >= 1).Select(x => x.Key).ToList())
-            {
-                playersRemaining++;
-            }
-
-            if (playersRemaining == 0)
-            {
-                _currentState = State.GameOver;
-
-                CalculateHighScore();
-
-                _gameOverSettings.GameOverCamera.gameObject.SetActive(true);
-                _gameOverSettings.GameOverUICanvas.gameObject.SetActive(true);
-
-                this.gameObject.GetComponent<AudioSource>().enabled = false;
-                this.gameObject.GetComponent<AudioListener>().enabled = false;
-
-                _playersContainer.GetComponentsInChildren<Camera>().ToList().ForEach(x => x.gameObject.SetActive(false));
-            }
+            CheckPlayerLives();
+            CheckEnemiesRemaining();
         }
         else
         {
@@ -317,10 +305,10 @@ public class MainLevel : SceneBase
     private void GenerateMap()
     {
         int rowsCount = (_mapGenerationSettings.RandomSize)
-            ? UnityEngine.Random.Range(_mapGenerationSettings.MinRows, _mapGenerationSettings.MaxRows)
+            ? UnityEngine.Random.Range(_mapGenerationSettings.MinRows, _mapGenerationSettings.MaxRows + 1)
             : _mapGenerationSettings.Rows;
         int columnsCount = (_mapGenerationSettings.RandomSize)
-            ? UnityEngine.Random.Range(_mapGenerationSettings.MinColumns, _mapGenerationSettings.MaxColumns)
+            ? UnityEngine.Random.Range(_mapGenerationSettings.MinColumns, _mapGenerationSettings.MaxColumns + 1)
             : _mapGenerationSettings.Columns;
 
         // sync the data so the inspector has correct info of the number of columns/rows if it was randomly generated
@@ -348,6 +336,13 @@ public class MainLevel : SceneBase
 
                 _playerSpawners = _playerSpawners
                     .Union(roomScript.GetActiveSpawnersForType(SpawnerBase.SpawnerType.Player))
+                    .ToList();
+
+                // Get all the enemy spawners and grab their spawn manager components
+                _enemySpawners = _enemySpawners
+                    .Union(roomScript.GetActiveSpawnersForType(SpawnerBase.SpawnerType.Enemy)
+                                .Select(spawner => { return spawner.GetComponent<EnemyTankSpawner>(); })
+                                .ToList())
                     .ToList();
             }
         }
@@ -415,6 +410,56 @@ public class MainLevel : SceneBase
         GameManager.Instance.HighScores.Add(highscoreName, _playerScoresTable[highscoreID]);
     }
 
+    private void CheckPlayerLives()
+    {
+        int playersRemaining = 0;
+        foreach (var _ in _playerLivesTable.Where(x => x.Value >= 1).Select(x => x.Key).ToList())
+        {
+            playersRemaining++;
+        }
+
+        if (playersRemaining == 0)
+        {
+            GoToGameOverState();
+        }
+    }
+
+    private void CheckEnemiesRemaining()
+    {
+        // check to see if there are still instances to be spawned
+        int spawnersStillWorking = 0;
+        foreach (var _ in _enemySpawners.Where(x => x.InstancesSpawned < x.MaxInstancesToSpawn))
+        {
+            spawnersStillWorking++;
+        }
+
+        // if not, check to see if there are no AIInputController's alive - this is expensive and done at the very end as a spot check
+        if (spawnersStillWorking == 0)
+        {
+            var aiTanksAlive = GetComponentsInChildren<AIInputController>();
+
+            if (aiTanksAlive.Length == 0)
+            {
+                GoToGameOverState();
+            }
+        }
+    }
+
+    private void GoToGameOverState()
+    {
+        _currentState = State.GameOver;
+
+        CalculateHighScore();
+
+        _gameOverSettings.GameOverCamera.gameObject.SetActive(true);
+        _gameOverSettings.GameOverUICanvas.gameObject.SetActive(true);
+
+        this.gameObject.GetComponent<AudioSource>().enabled = false;
+        this.gameObject.GetComponent<AudioListener>().enabled = false;
+
+        _playersContainer.GetComponentsInChildren<Camera>().ToList().ForEach(x => x.gameObject.SetActive(false));
+    }
+
     private int GetDateAsInt()
     {
         var now = DateTime.Now;
@@ -423,6 +468,6 @@ public class MainLevel : SceneBase
 
     private Transform GetRandomPlayerSpawner()
     {
-        return _playerSpawners[UnityEngine.Random.Range(0, _playerSpawners.Count - 1)].transform;
+        return _playerSpawners[UnityEngine.Random.Range(0, _playerSpawners.Count)].transform;
     }
 }

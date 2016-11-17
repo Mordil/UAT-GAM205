@@ -301,9 +301,9 @@ public class AIInputController : InputControllerBase
         /// </summary>
         Stationary,
         /// <summary>
-        /// Patrol tank that phases between visible and invisible.
+        /// Patrol tank that is invisible.
         /// </summary>
-        PhaseShift,
+        Invisible,
         /// <summary>
         /// Flees the fight if too much health is lost.
         /// </summary>
@@ -344,8 +344,6 @@ public class AIInputController : InputControllerBase
 
     [SerializeField]
     private TankController _controller;
-    [SerializeField]
-    private OpacityPhaserSettings _shiftPhasingSettings;
 
     //[SerializeField]
     //private AggressivePersonalitySettings _agressiveSettings;
@@ -521,13 +519,12 @@ public class AIInputController : InputControllerBase
     {
         switch (_personality)
         {
-            // if the AI is meant to do phase shifting, check to see if it has the proper component
-            case Personality.PhaseShift:
-                // if not, add it and initialize its settings
-                if (GetComponent<OpacityPhaser>() == null)
+            // if the AI is meant to be invisible, check to see if it has the proper component
+            case Personality.Invisible:
+                // if not, add it
+                if (GetComponent<StealthTank>() == null)
                 {
-                    this.gameObject.AddComponent<OpacityPhaser>();
-                    GetComponent<OpacityPhaser>().Initialize(_shiftPhasingSettings);
+                    this.gameObject.AddComponent<StealthTank>();
                 }
                 break;
 
@@ -535,19 +532,14 @@ public class AIInputController : InputControllerBase
             case Personality.FrenchTank:
                 {
                     Vector3 newScale = MyTransform.localScale * .5f;
-                    newScale.y = 1;
                     MyTransform.localScale = newScale;
-
-                    var collider = GetComponent<SphereCollider>();
-                    collider.radius = .35f;
-                    collider.center = new Vector3(0, .1f, 0);
                 }
                 break;
 
             // if the tank is aggressive, update its scale for visual feedback
             case Personality.Aggressive:
                 {
-                    Vector3 newScale = MyTransform.localScale * 1.5f;
+                    Vector3 newScale = MyTransform.localScale * 1.15f;
                     newScale.y = 1;
                     MyTransform.localScale = newScale;
                 }
@@ -799,10 +791,11 @@ public class AIInputController : InputControllerBase
         if (Physics.Raycast(MyTransform.position, MyTransform.forward, out ray, speed))
         {
             GameObject obj = ray.collider.gameObject;
-
+            
             // return if the object hit was a player, flee target, or projectile (these are non blockers)
             return obj.IsOnSameLayer(ProjectSettings.Layers.Player) ||
                 obj.IsOnSameLayer(ProjectSettings.Layers.Projectiles) ||
+                obj.IsOnSameLayer(ProjectSettings.Layers.Floor) ||
                 (_fleeSettings.Target != null && obj == _fleeSettings.Target.gameObject);
         }
         // return true in all other cases
