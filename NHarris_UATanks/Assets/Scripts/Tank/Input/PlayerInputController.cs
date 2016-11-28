@@ -3,41 +3,42 @@ using UnityEngine;
 
 public class PlayerInputController : InputControllerBase
 {
-    private struct KeyMapping
+    private struct AxisMapping
     {
         private bool _hasBeenSet;
         public bool HasBeenSet { get { return _hasBeenSet; } }
 
-        public KeyCode Forward;
-        public KeyCode Backward;
-        public KeyCode RotateLeft;
-        public KeyCode RotateRight;
-        public KeyCode Shoot;
+        public string Vertical;
+        public string Horizontal;
+        public string Shoot;
 
-        public KeyMapping(int playerID)
+        public AxisMapping(int playerID)
         {
             switch (playerID)
             {
                 case 1:
-                    Forward = KeyCode.W;
-                    Backward = KeyCode.S;
-                    RotateLeft = KeyCode.A;
-                    RotateRight = KeyCode.D;
-                    Shoot = KeyCode.Space;
+                    Vertical = ProjectSettings.Axes.PLAYER1_VERTICAL;
+                    Horizontal = ProjectSettings.Axes.PLAYER1_HORIZONTAL;
+                    Shoot = ProjectSettings.Axes.PLAYER1_SHOOT;
                     break;
 
                 case 2:
-                    Forward = KeyCode.UpArrow;
-                    Backward = KeyCode.DownArrow;
-                    RotateLeft = KeyCode.LeftArrow;
-                    RotateRight = KeyCode.RightArrow;
-                    Shoot = KeyCode.RightAlt;
+                    Vertical = ProjectSettings.Axes.PLAYER2_VERTICAL;
+                    Horizontal = ProjectSettings.Axes.PLAYER2_HORIZONTAL;
+                    Shoot = ProjectSettings.Axes.PLAYER2_SHOOT;
+                    break;
+                    
+                case 3:
+                    Vertical = ProjectSettings.Axes.PLAYER3_VERTICAL;
+                    Horizontal = ProjectSettings.Axes.PLAYER3_HORIZONTAL;
+                    Shoot = ProjectSettings.Axes.PLAYER3_SHOOT;
                     break;
 
-                // not implementing players 3 & 4 for this class - would want to implement with controllers
-                case 3:
                 case 4:
-                    throw new NotImplementedException();
+                    Vertical = ProjectSettings.Axes.PLAYER4_VERTICAL;
+                    Horizontal = ProjectSettings.Axes.PLAYER4_HORIZONTAL;
+                    Shoot = ProjectSettings.Axes.PLAYER4_SHOOT;
+                    break;
 
                 default:
                     throw new IndexOutOfRangeException(string.Format("Max players allowed is 4: Recieved player ID {0}", playerID));
@@ -47,13 +48,13 @@ public class PlayerInputController : InputControllerBase
         }
     }
     
-    private KeyMapping _keyMapping;
+    private AxisMapping _axisMapping;
 
     protected override void Update()
     {
-        if (!_keyMapping.HasBeenSet)
+        if (!_axisMapping.HasBeenSet)
         {
-            _keyMapping = new KeyMapping(Settings.ID);
+            _axisMapping = new AxisMapping(Settings.ID);
         }
 
         HandleMovementInput();
@@ -64,11 +65,13 @@ public class PlayerInputController : InputControllerBase
     // Checks and sends input for positional movement.
     protected virtual void HandleMovementInput()
     {
-        if (Input.GetKey(_keyMapping.Forward))
+        float input = Input.GetAxis(_axisMapping.Vertical);
+
+        if (input > 0)
         {
             MotorComponent.Move(Settings.MovementSettings.Forward);
         }
-        else if (Input.GetKey(_keyMapping.Backward))
+        else if (input < 0)
         {
             MotorComponent.Move(-Settings.MovementSettings.Backward);
         }
@@ -77,11 +80,13 @@ public class PlayerInputController : InputControllerBase
     // Checks and sends input for rotational movement.
     protected virtual void HandleRotationInput()
     {
-        if (Input.GetKey(_keyMapping.RotateLeft))
+        float input = Input.GetAxis(_axisMapping.Horizontal);
+
+        if (input < 0)
         {
             MotorComponent.Rotate(-Settings.MovementSettings.Rotation);
         }
-        else if (Input.GetKey(_keyMapping.RotateRight))
+        else if (input > 0)
         {
             MotorComponent.Rotate(Settings.MovementSettings.Rotation);
         }
@@ -90,7 +95,7 @@ public class PlayerInputController : InputControllerBase
     // Handles all logic for shooting input
     protected virtual void HandleShootingInput()
     {
-        if (Input.GetKeyDown(_keyMapping.Shoot))
+        if (Input.GetAxis(_axisMapping.Shoot) > 0)
         {
             if (CanShoot())
             {
