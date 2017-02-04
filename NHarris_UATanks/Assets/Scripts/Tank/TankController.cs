@@ -119,7 +119,7 @@ public class TankController : BaseScript
                 this.gameObject.transform.position,
                 Settings.DeathSettings.DeathParticlePrefab.transform.rotation) as GameObject;
 
-            Destroy(deathPrefab, deathPrefab.GetComponent<ParticleSystem>().duration);
+            Destroy(deathPrefab, deathPrefab.GetComponent<ParticleSystem>().main.duration);
             Destroy(this.gameObject);
 
             if (Settings.IsPlayer)
