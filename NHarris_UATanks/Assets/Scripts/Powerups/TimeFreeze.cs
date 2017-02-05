@@ -9,7 +9,7 @@ public class TimeFreeze : Powerup
     private float _duration = 1.5f;
     public override float Duration { get { return _duration; } }
     
-    public override bool HasExpired { get { return _timeRemaining <= 0; } }
+    public override bool HasExpired { get { return !IsPermanent && _timeRemaining <= 0; } }
 
     [ReadOnly]
     [SerializeField]
