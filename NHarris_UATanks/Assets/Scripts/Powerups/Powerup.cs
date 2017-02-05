@@ -16,6 +16,10 @@ public abstract class Powerup : ScriptableObject
     [SerializeField]
     private AudioClip _soundEffect;
     public AudioClip SoundEffect { get { return _soundEffect; } }
+
+    [SerializeField]
+    private GameObject _visualPrefab;
+    public GameObject VisualPrefab { get { return _visualPrefab; } }
     
     public abstract bool HasExpired { get; }
 
