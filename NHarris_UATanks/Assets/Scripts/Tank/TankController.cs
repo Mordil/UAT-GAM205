@@ -64,7 +64,7 @@ public class TankController : BaseScript
     public const string TOOK_DAMAGE_MESSAGE = "OnTookDamage";
 
     public bool IsDead { get { return _currentHealth <= 0; } }
-    public bool HasTripleShot { get { return _currentPickups.Where(x => x is PowerupTripleShot).Count() > 0; } }
+    public bool HasTripleShot { get { return _currentPickups.Where(x => x is TripleShot).Count() > 0; } }
     
     public int CurrentHealth { get { return _currentHealth; } }
 
@@ -83,7 +83,7 @@ public class TankController : BaseScript
 
     [ReadOnly]
     [SerializeField]
-    private List<IPowerup> _currentPickups;
+    private List<Powerup> _currentPickups;
 
     #region Unity Lifecycle
     protected override void Start()
@@ -91,7 +91,7 @@ public class TankController : BaseScript
         base.Start();
 
         _currentHealth = _settings.MaxHealth;
-        _currentPickups = new List<IPowerup>();
+        _currentPickups = new List<Powerup>();
 
         if (Settings.IsPlayer)
         {
@@ -144,15 +144,10 @@ public class TankController : BaseScript
     {
         if (otherObj.gameObject.IsOnSameLayer(ProjectSettings.Layers.Powerup))
         {
-            IPowerup powerup = otherObj.gameObject.GetComponent<IPowerup>();
+            // TODO: Powerup MonoBehaviour
+            Powerup powerup = otherObj.gameObject.GetComponent<Powerup>();
 
             powerup.OnPickup(this);
-
-            // if the powerup is an actual pickup that we retain, then we'll add it to maintain
-            if (powerup.IsPickup)
-            {
-                _currentPickups.Add(powerup);
-            }
         }
     }
     #endregion
@@ -251,10 +246,10 @@ public class TankController : BaseScript
 
     private void UpdatePickups()
     {
-        List<IPowerup> itemsToRemove = new List<IPowerup>();
+        List<Powerup> itemsToRemove = new List<Powerup>();
 
         // loop through the powerups so that they can receive updates
-        foreach (IPowerup powerup in _currentPickups)
+        foreach (Powerup powerup in _currentPickups)
         {
             // if the powerup has signaled it is about to expire
             if (powerup.HasExpired)
