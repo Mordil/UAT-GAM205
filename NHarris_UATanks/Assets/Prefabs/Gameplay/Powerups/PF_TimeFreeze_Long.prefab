@@ -25,7 +25,7 @@ GameObject:
   - component: {fileID: 114900361154636560}
   - component: {fileID: 114994642159524346}
   - component: {fileID: 114569103905708786}
-  m_Layer: 0
+  m_Layer: 14
   m_Name: PF_TimeFreeze_Long
   m_TagString: Untagged
   m_Icon: {fileID: 0}

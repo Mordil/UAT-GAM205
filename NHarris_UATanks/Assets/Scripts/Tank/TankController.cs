@@ -64,7 +64,7 @@ public class TankController : BaseScript
     public const string TOOK_DAMAGE_MESSAGE = "OnTookDamage";
 
     public bool IsDead { get { return _currentHealth <= 0; } }
-    public bool HasTripleShot { get { return _currentPickups.Where(x => x is TripleShot).Count() > 0; } }
+    public bool HasTripleShot { get { return _currentPickups.Where(x => x.Key is TripleShot).Count() > 0; } }
     
     public int CurrentHealth { get { return _currentHealth; } }
 
@@ -83,7 +83,7 @@ public class TankController : BaseScript
 
     [ReadOnly]
     [SerializeField]
-    private List<Powerup> _currentPickups;
+    private Dictionary<Powerup, float> _currentPickups;
 
     #region Unity Lifecycle
     protected override void Start()
@@ -91,7 +91,7 @@ public class TankController : BaseScript
         base.Start();
 
         _currentHealth = _settings.MaxHealth;
-        _currentPickups = new List<Powerup>();
+        _currentPickups = new Dictionary<Powerup, float>();
 
         if (Settings.IsPlayer)
         {
@@ -150,6 +150,7 @@ public class TankController : BaseScript
             if (powerup != null)
             {
                 powerup.OnPickup(this);
+                _currentPickups.Add(powerup, powerup.Duration);
             }
         }
     }
@@ -249,19 +250,28 @@ public class TankController : BaseScript
 
     private void UpdatePickups()
     {
+        if (_currentPickups.Count == 0) return;
+
         List<Powerup> itemsToRemove = new List<Powerup>();
+        List<Powerup> currentPickups = _currentPickups.Keys.ToList();
 
         // loop through the powerups so that they can receive updates
-        foreach (Powerup powerup in _currentPickups)
+        foreach (Powerup powerup in currentPickups)
         {
-            // if the powerup has signaled it is about to expire
-            if (powerup.HasExpired)
+            float timeRemaining = _currentPickups[powerup];
+            
+            if (timeRemaining <= 0)
             {
                 itemsToRemove.Add(powerup);
             }
             else
             {
-                powerup.OnUpdate(this);
+                powerup.OnUpdate(this);            
+
+                if (!powerup.IsPermanent)
+                {
+                    _currentPickups[powerup] = timeRemaining - Time.deltaTime;                
+                }
             }
         }
 

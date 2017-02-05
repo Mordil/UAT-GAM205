@@ -3,8 +3,6 @@
 [CreateAssetMenu(fileName = "New Health Pack", menuName ="Powerup/Health Pack")]
 public class HealthPack : Powerup
 {
-    // This expires as soon as it is picked up.
-    public override bool HasExpired { get { return true; } }
     public override float Duration { get { return 0f; } }
 
     [SerializeField]
@@ -19,8 +17,4 @@ public class HealthPack : Powerup
 
         controller.AddHealth(_amount);
     }
-
-    public override void OnExpire(TankController controller) { }
-
-    public override void OnUpdate(TankController controller) { }
 }

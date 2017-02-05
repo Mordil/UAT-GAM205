@@ -43,14 +43,20 @@ public class PowerupAgent: BaseScript
 
     protected virtual void OnTriggerEnter(Collider otherObj)
     {
-        _collider.enabled = false;
-        _instance.SetActive(false);
+        bool colliderIsEntity = otherObj.gameObject.IsOnSameLayer(ProjectSettings.Layers.Player) ||
+            otherObj.gameObject.IsOnSameLayer(ProjectSettings.Layers.Enemy);
 
-        if (_powerupData != null && _powerupData.SoundEffect != null)
+        if (colliderIsEntity)
         {
-            _audioSource.PlayOneShot(_powerupData.SoundEffect);
+            _collider.enabled = false;
+            _instance.SetActive(false);
 
-            Destroy(this.gameObject, _powerupData.SoundEffect.length);
+            if (_powerupData != null && _powerupData.SoundEffect != null)
+            {
+                _audioSource.PlayOneShot(_powerupData.SoundEffect);
+
+                Destroy(this.gameObject, _powerupData.SoundEffect.length);
+            }
         }
     }
 }

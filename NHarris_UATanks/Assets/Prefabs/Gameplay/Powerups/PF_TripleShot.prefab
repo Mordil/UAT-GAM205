@@ -25,7 +25,7 @@ GameObject:
   - component: {fileID: 114786478544507088}
   - component: {fileID: 114420076067396818}
   - component: {fileID: 114843440374884170}
-  m_Layer: 0
+  m_Layer: 14
   m_Name: PF_TripleShot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -146,7 +146,7 @@ MonoBehaviour:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1161691433155792}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 333eb338422b5e149963b1fc1b16aee7, type: 3}
   m_Name: 

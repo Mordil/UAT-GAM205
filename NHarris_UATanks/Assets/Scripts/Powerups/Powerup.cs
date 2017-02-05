@@ -21,11 +21,9 @@ public abstract class Powerup : ScriptableObject
     private GameObject _visualPrefab;
     public GameObject VisualPrefab { get { return _visualPrefab; } }
     
-    public abstract bool HasExpired { get; }
-
     public abstract float Duration { get; }
 
-    public abstract void OnPickup(TankController controller);
-    public abstract void OnUpdate(TankController controller);
-    public abstract void OnExpire(TankController controller);
+    public virtual void OnPickup(TankController controller) { }
+    public virtual void OnUpdate(TankController controller) { }
+    public virtual void OnExpire(TankController controller) { }
 }
