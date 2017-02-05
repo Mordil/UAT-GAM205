@@ -45,6 +45,12 @@ public class PowerupAgent: BaseScript
     {
         _collider.enabled = false;
         _instance.SetActive(false);
-        _audioSource.PlayOneShot(_powerupData.SoundEffect);
+
+        if (_powerupData != null && _powerupData.SoundEffect != null)
+        {
+            _audioSource.PlayOneShot(_powerupData.SoundEffect);
+
+            Destroy(this.gameObject, _powerupData.SoundEffect.length);
+        }
     }
 }
