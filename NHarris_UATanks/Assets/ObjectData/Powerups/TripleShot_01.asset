@@ -14,5 +14,7 @@ MonoBehaviour:
   _isPermanent: 0
   _canBePickedUpBy: 0
   _soundEffect: {fileID: 8300000, guid: c02bd3ba7b1edc64a8ad29ad6688bc6a, type: 3}
+  _visualPrefab: {fileID: 1473010996854148, guid: 665201a8bf1c921418a51c8581e63ec2,
+    type: 2}
   _duration: 3.5
   _timeRemaining: 0

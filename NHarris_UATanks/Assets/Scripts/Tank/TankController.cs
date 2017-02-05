@@ -144,10 +144,13 @@ public class TankController : BaseScript
     {
         if (otherObj.gameObject.IsOnSameLayer(ProjectSettings.Layers.Powerup))
         {
-            // TODO: Powerup MonoBehaviour
-            Powerup powerup = otherObj.gameObject.GetComponent<Powerup>();
+            PowerupAgent agent = otherObj.gameObject.GetComponent<PowerupAgent>();
 
-            powerup.OnPickup(this);
+            Powerup powerup = (agent != null) ? agent.PowerupData : null;
+            if (powerup != null)
+            {
+                powerup.OnPickup(this);
+            }
         }
     }
     #endregion
