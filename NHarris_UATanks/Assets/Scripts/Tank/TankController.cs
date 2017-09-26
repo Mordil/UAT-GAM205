@@ -64,7 +64,7 @@ public class TankController : BaseScript
     public const string TOOK_DAMAGE_MESSAGE = "OnTookDamage";
 
     public bool IsDead { get { return _currentHealth <= 0; } }
-    public bool HasTripleShot { get { return _currentPickups.Where(x => x is PowerupTripleShot).Count() > 0; } }
+    public bool HasTripleShot { get { return _currentPickups.Where(x => x.Key is TripleShot).Count() > 0; } }
     
     public int CurrentHealth { get { return _currentHealth; } }
 
@@ -83,7 +83,7 @@ public class TankController : BaseScript
 
     [ReadOnly]
     [SerializeField]
-    private List<IPowerup> _currentPickups;
+    private Dictionary<Powerup, float> _currentPickups;
 
     #region Unity Lifecycle
     protected override void Start()
@@ -91,7 +91,7 @@ public class TankController : BaseScript
         base.Start();
 
         _currentHealth = _settings.MaxHealth;
-        _currentPickups = new List<IPowerup>();
+        _currentPickups = new Dictionary<Powerup, float>();
 
         if (Settings.IsPlayer)
         {
@@ -119,7 +119,7 @@ public class TankController : BaseScript
                 this.gameObject.transform.position,
                 Settings.DeathSettings.DeathParticlePrefab.transform.rotation) as GameObject;
 
-            Destroy(deathPrefab, deathPrefab.GetComponent<ParticleSystem>().duration);
+            Destroy(deathPrefab, deathPrefab.GetComponent<ParticleSystem>().main.duration);
             Destroy(this.gameObject);
 
             if (Settings.IsPlayer)
@@ -144,14 +144,13 @@ public class TankController : BaseScript
     {
         if (otherObj.gameObject.IsOnSameLayer(ProjectSettings.Layers.Powerup))
         {
-            IPowerup powerup = otherObj.gameObject.GetComponent<IPowerup>();
+            PowerupAgent agent = otherObj.gameObject.GetComponent<PowerupAgent>();
 
-            powerup.OnPickup(this);
-
-            // if the powerup is an actual pickup that we retain, then we'll add it to maintain
-            if (powerup.IsPickup)
+            Powerup powerup = (agent != null) ? agent.PowerupData : null;
+            if (powerup != null)
             {
-                _currentPickups.Add(powerup);
+                powerup.OnPickup(this);
+                _currentPickups.Add(powerup, powerup.Duration);
             }
         }
     }
@@ -251,19 +250,28 @@ public class TankController : BaseScript
 
     private void UpdatePickups()
     {
-        List<IPowerup> itemsToRemove = new List<IPowerup>();
+        if (_currentPickups.Count == 0) return;
+
+        List<Powerup> itemsToRemove = new List<Powerup>();
+        List<Powerup> currentPickups = _currentPickups.Keys.ToList();
 
         // loop through the powerups so that they can receive updates
-        foreach (IPowerup powerup in _currentPickups)
+        foreach (Powerup powerup in currentPickups)
         {
-            // if the powerup has signaled it is about to expire
-            if (powerup.HasExpired)
+            float timeRemaining = _currentPickups[powerup];
+            
+            if (timeRemaining <= 0)
             {
                 itemsToRemove.Add(powerup);
             }
             else
             {
-                powerup.OnUpdate(this);
+                powerup.OnUpdate(this);            
+
+                if (!powerup.IsPermanent)
+                {
+                    _currentPickups[powerup] = timeRemaining - Time.deltaTime;                
+                }
             }
         }
 

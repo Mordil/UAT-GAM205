@@ -23,7 +23,7 @@ public class InputControllerBase : BaseScript
 
     [ReadOnly]
     [SerializeField]
-    protected List<IPowerup> CurrentPickups;
+    protected List<Powerup> CurrentPickups;
 
     protected override void CheckDependencies()
     {

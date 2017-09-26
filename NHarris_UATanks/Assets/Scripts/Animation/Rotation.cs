@@ -5,7 +5,7 @@ using UnityEngine;
 public class Rotation : BaseScript
 {
     [SerializeField]
-    private bool _shouldRotate;
+    private bool _shouldRotate = true;
 
     [SerializeField]
     private Vector3 _rotationAngles;
