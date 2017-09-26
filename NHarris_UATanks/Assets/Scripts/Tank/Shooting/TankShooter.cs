@@ -46,7 +46,7 @@ public class TankShooter : MonoBehaviour
 
         // gives the bullet its forward trajectory and owner reference
         bullet.GetComponent<TankBulletAgent>()
-            .Initialize(direction, _controller);
+            .Initialize(direction, _controller, _settings.TankBullet);
 
         bullet.gameObject.name = this.gameObject.GetHashCode().ToString() + "_Bullet";
 

@@ -136,7 +136,7 @@ public class TankController : BaseScript
         // if the tank was hit by a bullet
         if (otherObj.gameObject.IsOnSameLayer(ProjectSettings.Layers.Projectiles))
         {
-            onBulletCollision(otherObj.gameObject.GetComponent<TankBullet>());
+            onBulletCollision(otherObj.gameObject.GetComponent<TankBulletAgent>());
         }
     }
 
@@ -228,7 +228,7 @@ public class TankController : BaseScript
         }
     }
 
-    protected virtual void onBulletCollision(TankBullet bullet)
+    protected virtual void onBulletCollision(TankBulletAgent bullet)
     {
         // if it's not friendly fire
         if (bullet.Owner != null &&
