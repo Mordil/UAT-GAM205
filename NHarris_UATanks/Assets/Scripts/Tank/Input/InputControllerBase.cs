@@ -41,7 +41,15 @@ public class InputControllerBase : BaseScript
     /// </summary>
     protected void Shoot()
     {
-        ShooterComponent.Fire();
+        if (Controller.HasTripleShot)
+        {
+            ShooterComponent.FireTripleShot();
+        }
+        else
+        {
+            ShooterComponent.FireSingleShot();
+        }
+
         TimeLastFired = Time.time;
     }
     
