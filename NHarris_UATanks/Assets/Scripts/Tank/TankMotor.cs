@@ -1,27 +1,13 @@
-﻿using L4.Unity.Common;
-using UnityEngine;
+﻿using UnityEngine;
 
-public class TankMotor : BaseScript
+[RequireComponent(typeof(CharacterController))]
+public class TankMotor : MonoBehaviour
 {
-    /// <summary>
-    /// The Tank GameObject's transform.
-    /// </summary>
-    public Transform TransformComponent { get { return _bodyTransform; } }
-
-    // references to the gameobject containers' transforms for the tank body segments
     [SerializeField]
     private Transform _bodyTransform;
 
     [SerializeField]
     private CharacterController _characterController;
-
-    protected override void CheckDependencies()
-    {
-        base.CheckDependencies();
-
-        this.CheckAndAssignIfDependencyIsNull(ref _bodyTransform, true);
-        this.CheckAndAssignIfDependencyIsNull(ref _characterController);
-    }
 
     /// <summary>
     /// Moves the tank forward by the the speed provided.
