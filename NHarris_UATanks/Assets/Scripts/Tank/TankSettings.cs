@@ -1,53 +1,6 @@
 ﻿using System;
 using UnityEngine;
 
-[Serializable]
-public class MovementSpeeds
-{
-    public float Forward { get { return _forward; } }
-    public float Backward { get { return _backward; } }
-    public float Rotation { get { return _rotation; } }
-
-    [SerializeField]
-    [Tooltip("Units (in meters) to move per second.")]
-    private float _forward = 3f;
-    [SerializeField]
-    [Tooltip("Units (in meters) to move per second.")]
-    private float _backward = 3f;
-    [SerializeField]
-    [Tooltip("Rotation in degrees the body should rotate.")]
-    private float _rotation = 180f;
-}
-
-[Serializable]
-public class BulletSettings
-{
-    // See TankBullet for additional details.
-
-    /// <summary>
-    /// The spawner's transform.
-    /// </summary>
-    public Transform SpawnPoint { get { return _spawnPoint; } }
-
-    /// <summary>
-    /// Reference to the object's prefab.
-    /// </summary>
-    public GameObject Prefab { get { return _prefab; } }
-
-
-    [SerializeField]
-    private GameObject _prefab;
-    [SerializeField]
-    [Tooltip("Where the bullet is to spawn at.")]
-    private Transform _spawnPoint;
-}
-
-[Serializable]
-public class DeathSettings
-{
-    public GameObject DeathParticlePrefab;
-}
-
 public class TankSettings : MonoBehaviour
 {
     public bool IsPlayer { get { return _isPlayer; } }
@@ -58,9 +11,9 @@ public class TankSettings : MonoBehaviour
     public int KillValue { get { return _killValue; } }
     public float RateOfFire { get { return _rateOfFire; } }
 
-    public MovementSpeeds MovementSettings { get { return _movementSettings; } }
-    public BulletSettings BulletSettings { get { return _bulletSettings; } }
-    public DeathSettings DeathSettings { get { return _deathSettings; } }
+    public TankMovementSettings MovementSettings { get { return _movementSettings; } }
+    public TankShooterSettings BulletSettings { get { return _bulletSettings; } }
+    public TankDeathSettings DeathSettings { get { return _deathSettings; } }
 
     [SerializeField]
     private bool _isPlayer = false;
@@ -78,11 +31,11 @@ public class TankSettings : MonoBehaviour
     private float _rateOfFire = 0.5f;
 
     [SerializeField]
-    private MovementSpeeds _movementSettings;
+    private TankMovementSettings _movementSettings;
     [SerializeField]
-    private BulletSettings _bulletSettings;
+    private TankShooterSettings _bulletSettings;
     [SerializeField]
-    private DeathSettings _deathSettings;
+    private TankDeathSettings _deathSettings;
 
     public void ModifyStat(int? health = null)
     {

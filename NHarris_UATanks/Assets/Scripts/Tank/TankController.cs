@@ -115,9 +115,9 @@ public class TankController : BaseScript
         if (IsDead)
         {
             var deathPrefab = Instantiate(
-                Settings.DeathSettings.DeathParticlePrefab,
+                Settings.DeathSettings.DeathVFXPrefab,
                 this.gameObject.transform.position,
-                Settings.DeathSettings.DeathParticlePrefab.transform.rotation) as GameObject;
+                Settings.DeathSettings.DeathVFXPrefab.transform.rotation) as GameObject;
 
             Destroy(deathPrefab, deathPrefab.GetComponent<ParticleSystem>().main.duration);
             Destroy(this.gameObject);
