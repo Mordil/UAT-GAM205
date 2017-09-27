@@ -13,7 +13,7 @@ public class TankShootingAgent : MonoBehaviour, ITankComponent
 
     public void SetUp(TankSettings settings)
     {
-        _settings = settings.ShootingSettings;
+        _settings = settings.BulletSettings;
     }
 
     /// <summary>
