@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(TankSettings), typeof(TankMotor), typeof(TankShooter))]
+[RequireComponent(typeof(TankSettings), typeof(TankMovementAgent), typeof(TankShootingAgent))]
 public class InputControllerBase : BaseScript
 {
     /// <summary>
@@ -13,9 +13,9 @@ public class InputControllerBase : BaseScript
     [SerializeField]
     protected TankSettings Settings;
     [SerializeField]
-    protected TankMotor MotorComponent;
+    protected TankMovementAgent MotorComponent;
     [SerializeField]
-    protected TankShooter ShooterComponent;
+    protected TankShootingAgent ShooterComponent;
     [SerializeField]
     protected TankController Controller;
     [SerializeField]

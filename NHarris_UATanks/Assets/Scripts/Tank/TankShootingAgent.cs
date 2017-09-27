@@ -1,16 +1,20 @@
 ﻿using UnityEngine;
 
 [RequireComponent(typeof(TankSettings), typeof(AudioSource))]
-public class TankShooter : MonoBehaviour
+public class TankShootingAgent : MonoBehaviour, ITankComponent
 {
-    [SerializeField]
-    private TankShooterSettings _settings;
     [SerializeField]
     private Transform _myTransform;
     [SerializeField]
     private AudioSource _shootingAudioSource;
     [SerializeField]
     private TankController _controller;
+    private TankShootingSettings _settings;
+
+    public void SetUp(TankSettings settings)
+    {
+        _settings = settings.ShootingSettings;
+    }
 
     /// <summary>
     /// Instantiates a new bullet from the GameObject's TankSettings component and initializes it.

@@ -1,13 +1,15 @@
 ﻿using UnityEngine;
 
 [RequireComponent(typeof(CharacterController))]
-public class TankMotor : MonoBehaviour
+public class TankMovementAgent : MonoBehaviour, ITankComponent
 {
     [SerializeField]
     private Transform _bodyTransform;
 
     [SerializeField]
     private CharacterController _characterController;
+
+    public void SetUp(TankSettings settings) { }
 
     /// <summary>
     /// Moves the tank forward by the the speed provided.
