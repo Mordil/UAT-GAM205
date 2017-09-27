@@ -5,5 +5,5 @@ public class TankDeathSettings : ScriptableObject
 {
     [SerializeField]
     private GameObject _deathVFXPrefab;
-    public GameObject DeathVFXPrefab;
+    public GameObject DeathVFXPrefab { get { return _deathVFXPrefab; } }
 }
