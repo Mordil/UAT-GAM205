@@ -176,14 +176,12 @@ public class MainLevel : SceneBase
 
         // Grab all of the enemies at the start of the game to reference later
         // if dynamic spawning is added to the game, this will need to be updated
-        _enemyList = _environmentContainer.GetComponentsInChildren<TankManager>()
-            .Where(x => x.IsPlayer == false)
+        _enemyList = _environmentContainer.GetComponentsInChildren<ComputerTankManager>()
             .Select(x => x.gameObject)
             .ToList();
 
         // Grab all of the players, which are child objects of the main level (or should be)
-        _playersList = this.GetComponentsInChildren<TankManager>()
-            .Where(x => x.IsPlayer)
+        _playersList = this.GetComponentsInChildren<PlayerTankManager>()
             .Select(x => x.gameObject)
             .ToList();
     }
@@ -215,7 +213,7 @@ public class MainLevel : SceneBase
         var player = Instantiate(_playerPrefab, GetRandomPlayerSpawner().position, _playerPrefab.transform.rotation) as GameObject;
         player.name = "Player_" + id;
         player.transform.SetParent(_playersContainer.transform);
-        player.GetComponent<TankManager>().ID = id;
+        player.GetComponent<PlayerTankManager>().ID = id;
 
         float cameraRectWidth = 1f;
         float cameraRectHeight = 1f;
