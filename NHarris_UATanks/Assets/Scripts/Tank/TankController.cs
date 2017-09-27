@@ -159,8 +159,6 @@ public class TankController : BaseScript
     #region BaseScript
     protected override void CheckDependencies()
     {
-        this.CheckAndAssignIfDependencyIsNull(ref _settings);
-
         if (Settings.IsPlayer)
         {
             _healthHUDSettings.CheckDependencies();

@@ -28,8 +28,7 @@ public class InputControllerBase : BaseScript
     protected override void CheckDependencies()
     {
         base.CheckDependencies();
-
-        this.CheckAndAssignIfDependencyIsNull(ref Settings);
+        
         this.CheckAndAssignIfDependencyIsNull(ref MotorComponent);
         this.CheckAndAssignIfDependencyIsNull(ref ShooterComponent);
         this.CheckAndAssignIfDependencyIsNull(ref Controller);
@@ -59,7 +58,7 @@ public class InputControllerBase : BaseScript
     /// <returns></returns>
     protected bool CanShoot()
     {
-        return (Time.time - TimeLastFired) >= Settings.RateOfFire;
+        return (Time.time - TimeLastFired) >= Settings.BulletSettings.RateOfFire;
     }
 
     /// <summary>

@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cbfa85a73dd84bf4899ca0961ba6c5c1, type: 3}
+  m_Name: OD_Tank_Player
+  m_EditorClassIdentifier: 
+  _isPlayer: 1
+  _maxHealth: 20
+  _healthRegenRate: 0
+  _killValue: 5
+  _movementSettings: {fileID: 11400000, guid: 94c3a5a4d34d1d44ab992c107581f80e, type: 2}
+  _bulletSettings: {fileID: 11400000, guid: 55ec6984b58d72b4295595a7c36d9b21, type: 2}
+  _deathSettings: {fileID: 11400000, guid: 5280fd6f012ce8c4cab0acb934e92d69, type: 2}
