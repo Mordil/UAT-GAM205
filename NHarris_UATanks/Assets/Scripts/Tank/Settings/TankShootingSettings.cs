@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
-[CreateAssetMenu(fileName = "New_TankShooterSettings", menuName = "Tank/Settings/Shooting")]
-public class TankShooterSettings : ScriptableObject
+[CreateAssetMenu(fileName = "New_TankShootingSettings", menuName = "Tank/Settings/Shooting")]
+public class TankShootingSettings : ScriptableObject
 {
     [SerializeField]
     [Tooltip("The number of seconds between each shot.")]

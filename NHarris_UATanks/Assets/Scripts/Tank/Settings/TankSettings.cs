@@ -22,8 +22,8 @@ public class TankSettings : ScriptableObject
     public TankMovementSettings MovementSettings { get { return _movementSettings; } }
 
     [SerializeField]
-    private TankShooterSettings _bulletSettings;
-    public TankShooterSettings BulletSettings { get { return _bulletSettings; } }
+    private TankShootingSettings _bulletSettings;
+    public TankShootingSettings BulletSettings { get { return _bulletSettings; } }
 
     [SerializeField]
     private TankDeathSettings _deathSettings;
