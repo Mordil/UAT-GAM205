@@ -89,8 +89,7 @@ public class TankController : BaseScript
     protected override void Start()
     {
         base.Start();
-
-        _currentHealth = _settings.MaxHealth;
+        
         _currentPickups = new Dictionary<Powerup, float>();
 
         if (Settings.IsPlayer)
@@ -131,15 +130,6 @@ public class TankController : BaseScript
         UpdatePickups();
 	}
 
-    protected virtual void OnCollisionEnter(Collision otherObj)
-    {
-        // if the tank was hit by a bullet
-        if (otherObj.gameObject.IsOnSameLayer(ProjectSettings.Layers.Projectiles))
-        {
-            onBulletCollision(otherObj.gameObject.GetComponent<TankBulletAgent>());
-        }
-    }
-
     protected virtual void OnTriggerEnter(Collider otherObj)
     {
         if (otherObj.gameObject.IsOnSameLayer(ProjectSettings.Layers.Powerup))
@@ -152,17 +142,6 @@ public class TankController : BaseScript
                 powerup.OnPickup(this);
                 _currentPickups.Add(powerup, powerup.Duration);
             }
-        }
-    }
-    #endregion
-
-    #region BaseScript
-    protected override void CheckDependencies()
-    {
-        if (Settings.IsPlayer)
-        {
-            _healthHUDSettings.CheckDependencies();
-            _playerHUDSettings.CheckDependencies();
         }
     }
     #endregion
