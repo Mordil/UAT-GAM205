@@ -23,7 +23,7 @@ public abstract class Powerup : ScriptableObject
     
     public abstract float Duration { get; }
 
-    public virtual void OnPickup(TankController controller) { }
-    public virtual void OnUpdate(TankController controller) { }
-    public virtual void OnExpire(TankController controller) { }
+    public virtual void OnPickup(GameObject entity) { }
+    public virtual void OnUpdate(GameObject entity) { }
+    public virtual void OnExpire(GameObject entity) { }
 }

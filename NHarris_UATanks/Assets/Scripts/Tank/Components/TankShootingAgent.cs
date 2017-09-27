@@ -7,8 +7,6 @@ public class TankShootingAgent : MonoBehaviour, ITankComponent
     private Transform _myTransform;
     [SerializeField]
     private AudioSource _shootingAudioSource;
-    [SerializeField]
-    private TankController _controller;
     private TankShootingSettings _settings;
 
     public void SetUp(TankSettings settings)
@@ -50,7 +48,7 @@ public class TankShootingAgent : MonoBehaviour, ITankComponent
 
         // gives the bullet its forward trajectory and owner reference
         bullet.GetComponent<TankBulletAgent>()
-            .Initialize(direction, _controller, _settings.TankBullet);
+            .Initialize(direction, this.gameObject, _settings.TankBullet);
 
         bullet.gameObject.name = this.gameObject.GetHashCode().ToString() + "_Bullet";
 

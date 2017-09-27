@@ -9,7 +9,7 @@ public class TankBulletAgent : MonoBehaviour
     /// <summary>
     /// The tank that fired this bullet.
     /// </summary>
-    public TankController Owner { get; private set; }
+    public GameObject Owner { get; private set; }
 
     [SerializeField]
     private TankBullet _bulletData;
@@ -31,7 +31,7 @@ public class TankBulletAgent : MonoBehaviour
     /// <param name="forwardVector">The forward vector of the shooter.</param>
     /// <param name="creatorLayer">The game object initializing the bullet.</param>
     /// <param name="bulletData">The bullet that is being fired</param>
-    public void Initialize(Vector3 forwardVector, TankController owner, TankBullet bulletData)
+    public void Initialize(Vector3 forwardVector, GameObject owner, TankBullet bulletData)
     {
         Owner = owner;
         _bulletData = bulletData;

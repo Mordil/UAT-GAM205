@@ -8,13 +8,17 @@ public class HealthPack : Powerup
     [SerializeField]
     private int _amount;
 
-    public override void OnPickup(TankController controller)
+    public override void OnPickup(GameObject entity)
     {
-        if (IsPermanent)
+        var agent = entity.GetComponent<HealthAgent>();
+        if (agent)
         {
-            controller.Settings.ModifyStat(health: _amount);
-        }
+            if (IsPermanent)
+            {
+                agent.ModifyMaxHealth(_amount);
+            }
 
-        controller.AddHealth(_amount);
+            agent.AddHealth(_amount);
+        }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using L4.Unity.Common;
-using System.Collections.Generic;
 using UnityEngine;
+
+using TankPowerupAgent = UATTanks.Tank.Components.PowerupAgent;
 
 [RequireComponent(typeof(TankSettings), typeof(TankMovementAgent), typeof(TankShootingAgent))]
 public class InputControllerBase : BaseScript
@@ -17,30 +18,16 @@ public class InputControllerBase : BaseScript
     [SerializeField]
     protected TankShootingAgent ShooterComponent;
     [SerializeField]
-    protected TankController Controller;
+    protected TankPowerupAgent PowerupComponent;
     [SerializeField]
     protected Transform MyTransform;
-
-    [ReadOnly]
-    [SerializeField]
-    protected List<Powerup> CurrentPickups;
-
-    protected override void CheckDependencies()
-    {
-        base.CheckDependencies();
-        
-        this.CheckAndAssignIfDependencyIsNull(ref MotorComponent);
-        this.CheckAndAssignIfDependencyIsNull(ref ShooterComponent);
-        this.CheckAndAssignIfDependencyIsNull(ref Controller);
-        this.CheckAndAssignIfDependencyIsNull(ref MyTransform, true);
-    }
     
     /// <summary>
     /// Fires a bullet with the ShooterComponent.
     /// </summary>
     protected void Shoot()
     {
-        if (Controller.HasTripleShot)
+        if (PowerupComponent != null && PowerupComponent.HasTripleShot)
         {
             ShooterComponent.FireTripleShot();
         }
