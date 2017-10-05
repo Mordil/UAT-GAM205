@@ -50,20 +50,20 @@ public class PlayerInputController : InputControllerBase
     
     private AxisMapping _axisMapping;
 
-    protected override void Update()
+    private void Update()
     {
-        if (!_axisMapping.HasBeenSet)
-        {
-            _axisMapping = new AxisMapping(Settings.ID);
-        }
-
         HandleMovementInput();
         HandleRotationInput();
         HandleShootingInput();
     }
 
+    public void ResetAxisMapping(int id)
+    {
+        _axisMapping = new AxisMapping(id);
+    }
+
     // Checks and sends input for positional movement.
-    protected virtual void HandleMovementInput()
+    private void HandleMovementInput()
     {
         float input = Input.GetAxis(_axisMapping.Vertical);
 
@@ -78,7 +78,7 @@ public class PlayerInputController : InputControllerBase
     }
 
     // Checks and sends input for rotational movement.
-    protected virtual void HandleRotationInput()
+    private void HandleRotationInput()
     {
         float input = Input.GetAxis(_axisMapping.Horizontal);
 
@@ -93,7 +93,7 @@ public class PlayerInputController : InputControllerBase
     }
 
     // Handles all logic for shooting input
-    protected virtual void HandleShootingInput()
+    private void HandleShootingInput()
     {
         if (Input.GetAxis(_axisMapping.Shoot) > 0)
         {

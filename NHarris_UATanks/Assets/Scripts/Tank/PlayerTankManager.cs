@@ -15,7 +15,17 @@ public class TankHealthHUDController
     public Color FullHealthColor = Color.green;
     public Color ZeroHealthColor = Color.red;
 
+    public void SyncHealthUI(int maxHealth)
+    {
+        UpdateUI((int)Math.Ceiling(Slider.value), maxHealth);
+    }
+
     public void SyncHealthUI(int currentHealth, int maxHealth)
+    {
+        UpdateUI(currentHealth, maxHealth);
+    }
+
+    private void UpdateUI(int currentHealth, int maxHealth)
     {
         Slider.value = currentHealth;
         Slider.maxValue = maxHealth;
@@ -41,11 +51,21 @@ public class PlayerTankManager : BaseTankManager
     {
         base.Awake();
 
+        var healthAgent = GetComponent<HealthAgent>();
+        healthAgent.OnGainedHealth.AddListener(currentHealth => UpdateHealthHUD(currentHealth));
+        healthAgent.OnTookDamage.AddListener(currentHealth => UpdateHealthHUD(currentHealth));
+        healthAgent.OnMaxHealthChanged.AddListener(newMaxHealth => _healthHUDController.SyncHealthUI(newMaxHealth));
+        healthAgent.OnKilled.AddListener(() => Die());
+
+        var inputAgent = GetComponent<PlayerInputController>();
+        inputAgent.ResetAxisMapping(ID);
+
         var level = GameManager.Instance.CurrentScene.As<MainLevel>();
 
-        UpdateHealthHUD(Settings.MaxHealth);
         _playerHUDController.LivesLeftText.text = level.GetLivesRemaining(ID).ToString();
         _playerHUDController.ScoreText.text = level.GetScore(ID).ToString();
+
+        UpdateHealthHUD(Settings.MaxHealth);
     }
 
     protected override void Die()
@@ -53,16 +73,6 @@ public class PlayerTankManager : BaseTankManager
         base.Die();
 
         this.SendMessageUpwards(MainLevel.PLAYER_DIED_MESSAGE, ID);
-    }
-
-    public void OnTookDamage(int currentHealth)
-    {
-        UpdateHealthHUD(currentHealth);
-    }
-
-    public void OnGainedHealth(int amount)
-    {
-        UpdateHealthHUD(amount);
     }
 
     public void OnKilledTarget(int targetValue)

@@ -3,6 +3,7 @@
 public abstract class BaseTankManager : MonoBehaviour
 {
     public const string KILLED_TARGET_MESSAGE = "OnKilledTarget";
+    public const string ON_TOOK_DAMAGE = "OnTookDamage";
 
     public int ID { get; set; }
 

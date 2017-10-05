@@ -282,8 +282,6 @@ public class AIVisionSettings
     }
 }
 
-[HelpURL("Assets/Scripts/Tank/README.md")]
-[RequireComponent(typeof(TankController))]
 public class AIInputController : InputControllerBase
 {
     public enum Personality
@@ -328,6 +326,9 @@ public class AIInputController : InputControllerBase
     [SerializeField]
     [Tooltip("The minimum distance the tank must remain from a player while chasing.")]
     private float _minDistanceFromTarget = 3f;
+    [SerializeField]
+    [ReadOnly]
+    private float _timeOfLastHealthGain;
 
     [ReadOnly]
     [SerializeField]
@@ -343,7 +344,7 @@ public class AIInputController : InputControllerBase
     private Transform _currentTarget;
 
     [SerializeField]
-    private TankController _controller;
+    private HealthAgent _healthAgent;
 
     //[SerializeField]
     //private AggressivePersonalitySettings _agressiveSettings;
@@ -363,7 +364,7 @@ public class AIInputController : InputControllerBase
     #endregion
 
     #region Unity Methods
-    protected override void Start()
+    protected override void Awake()
     {
         base.Start();
 
@@ -380,12 +381,6 @@ public class AIInputController : InputControllerBase
         // make sure the trigger's radius is the proper size
         _triggerSphereCollider.radius = _visionSettings.HearingDistance;
         _mainLevel = GameManager.Instance.CurrentScene.As<MainLevel>();
-    }
-
-    protected override void Awake()
-    {
-        // because a tank can be instantiated at runtime, start won't be called, so we do it ourselves
-        Start();
     }
 
     protected override void Update()
@@ -492,25 +487,16 @@ public class AIInputController : InputControllerBase
         }
     }
     #endregion
-
-    #region Parent methods
-    protected override void CheckDependencies()
-    {
-        base.CheckDependencies();
-
-        this.CheckAndAssignIfDependencyIsNull(ref _controller);
-    }
-    #endregion
-
+    
     // Handler method for the TankController message broadcast when hit by a bullet
-    public void OnTookDamage(TankController shooter)
+    public void OnTookDamage(GameObject source)
     {
-        Transform shooterTransform = shooter.transform;
+        Transform sourceTransform = source.transform;
 
         // if our current target is not the shooter, switch targets
-        if (_currentTarget != shooterTransform)
+        if (_currentTarget != sourceTransform)
         {
-            _currentTarget = shooterTransform;
+            _currentTarget = sourceTransform;
             GoToMode(ActionMode.Chase);
         }
     }
@@ -566,11 +552,14 @@ public class AIInputController : InputControllerBase
 
     private void CheckIfShouldFlee()
     {
-        // if we're not already fleeing and our health is low enough, go to flee mode
-        if (_currentActionMode != ActionMode.Flee &&
-            _controller.CurrentHealth <= _fleeSettings.HealthThresholdToFlee)
+        if (_healthAgent != null)
         {
-            GoToMode(ActionMode.Flee);
+            // if we're not already fleeing and our health is low enough, go to flee mode
+            if (_currentActionMode != ActionMode.Flee &&
+                _healthAgent.CurrentHealth <= _fleeSettings.HealthThresholdToFlee)
+            {
+                GoToMode(ActionMode.Flee);
+            }
         }
     }
 
@@ -684,7 +673,7 @@ public class AIInputController : InputControllerBase
             }
             else // regain health
             {
-                _controller.RegenerateHealth();
+                RegenerateHealth();
             }
         }
         else // we need to move towards the flee target still
@@ -769,6 +758,24 @@ public class AIInputController : InputControllerBase
         }
 
         _currentActionMode = newMode;
+    }
+
+    private void RegenerateHealth()
+    {
+        if (_timeOfLastHealthGain == 0)
+        {
+            _timeOfLastHealthGain = Time.time;
+            return;
+        }
+
+        float timeDiff = Time.time - _timeOfLastHealthGain;
+
+        // if it has been at least 1 second
+        if (timeDiff >= 1)
+        {
+            _timeOfLastHealthGain = Time.time;
+            _healthAgent.AddHealth((int)(Settings.HealthRegenRate * timeDiff));
+        }
     }
 
     private bool IsLookingAtPoint(Transform pointToCheck)

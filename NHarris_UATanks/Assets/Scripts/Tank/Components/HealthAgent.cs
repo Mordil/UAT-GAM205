@@ -3,14 +3,16 @@ using UnityEngine.Events;
 
 public class HealthAgent : MonoBehaviour, ITankComponent
 {
+    [SerializeField]
+    [ReadOnly]
+    private int _currentHealth;
+    public int CurrentHealth { get { return _currentHealth; } }
+
     public UnityEvent<int> OnTookDamage;
     public UnityEvent<int> OnGainedHealth;
     public UnityEvent<int> OnMaxHealthChanged;
     public UnityEvent OnKilled;
 
-    [SerializeField]
-    [ReadOnly]
-    private int _currentHealth;
     private int _maxHealth;
     private int _killValue;
 
@@ -63,6 +65,8 @@ public class HealthAgent : MonoBehaviour, ITankComponent
             agent.Owner.gameObject.layer != this.gameObject.layer)
         {
             TakeDamage(agent.Damage);
+
+            SendMessage(BaseTankManager.ON_TOOK_DAMAGE, agent.Owner, SendMessageOptions.DontRequireReceiver);
 
             if (_currentHealth <= 0)
             {
