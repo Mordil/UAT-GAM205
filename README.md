@@ -5,6 +5,8 @@ This game is a split-screen multiplayer 3D game that randomly spawns players in 
 
 Each week added new features and marked the project's overall weekly milestone.
 
+> :exclamation: As part of my [UAT GPE-338 "Advanced Gameplay Programming"](https://github.com/mordil/uat-gpe338) course, I refactored several sections of this game to use concepts taught in the course. These changes can be seen on the [`#refactor-tanks`](https://github.com/mordil/uat-gam205/tree/refactor-tanks) branch.
+
 ## Course Description
 
 This course was modeled after Unity's [Tank! Tutorial](https://unity3d.com/learn/tutorials/projects/tanks-tutorial), with additional features such as AI + Pathfinding, split-screen multiplayer, and more.
